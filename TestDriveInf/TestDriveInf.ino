@@ -19,14 +19,14 @@ void loop()
   
     while(1){
       move.driveInf('f'); 
-      for(i=0; i<10; i++){
+      for(i=0; i<5; i++){
       left_value = analogRead(LEFT_SENSOR);
       right_value = analogRead(RIGHT_SENSOR);
       LeftTot=left_value+LeftTot;
       RightTot=right_value+RightTot;
       }
-    LeftAvg=LeftTot/10;
-    RightAvg=RightTot/10;
+    LeftAvg=LeftTot/5;
+    RightAvg=RightTot/5;
     LeftTot=0;
     RightTot=0;
 
