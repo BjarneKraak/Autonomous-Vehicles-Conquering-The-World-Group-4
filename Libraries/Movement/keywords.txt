@@ -1,0 +1,13 @@
+#KEYWORDS for movement library
+
+#type 1
+Movement	KEYWORD1
+
+#type 2
+begin	KEYWORD2
+moveStraight	KEYWORD2
+turn	KEYWORD2
+driveInf	KEYWORD2
+stopDriving	KEYWORD2
+turnInf	KEYWORD2
+maneuver	KEYWORD2
