@@ -3,7 +3,7 @@
 #define RIGHT_SENSOR A1
 #include <Movement.h> // include movement library
 
-Movement move(13,12,false); // declare a class, use pins 12 (for left servo) and 13 (for right servo) and choose whether you want to debug or not
+Movement move(13,12,false); // declare a class, use pins 13 (for left servo) and 12 (for right servo) and choose whether you want to debug or not
 
 void setup() 
 {
@@ -15,7 +15,8 @@ void setup()
 
 void loop()
 {
-    while(1){
+    while(1)
+    {
       move.driveInf('f'); 
       int left_avg = findLeftIRAvg();
       int right_avg = findRightIRAvg();
@@ -26,18 +27,22 @@ void loop()
       Serial.print(right_avg);
       Serial.println();
     
-      if(left_avg>700){
+      if(left_avg>700)
+      {
         move.turn(20,'l');
-        }
-      else if(right_avg>700){
+      }
+      else if(right_avg>700)
+      {
         move.turn(20,'r');
-        }
+      }
     }
 }
 
-int findLeftIRAvg(){
+int findLeftIRAvg()
+{
   int left_tot = 0;
-  for(int i=0; i<10; i++){
+  for(int i=0; i<10; i++)
+  {
     int left_value = analogRead(LEFT_SENSOR);
     left_tot=left_value+left_tot;
   }
@@ -45,9 +50,11 @@ int findLeftIRAvg(){
   return left_avg;
 }
 
-int findRightIRAvg(){
+int findRightIRAvg()
+{
   int right_tot = 0;
-  for(int i=0; i<10; i++){
+  for(int i=0; i<10; i++)
+  {
     int right_value = analogRead(RIGHT_SENSOR);
     right_tot=right_value+right_tot;
   }
