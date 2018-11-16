@@ -138,4 +138,3 @@ long ultraMeasuredDistance() {
     duration = pulseIn(9, HIGH);
     return duration/29/2;
   }
-
