@@ -1,6 +1,7 @@
 
 #define LEFT_SENSOR A0
 #define RIGHT_SENSOR A1
+#define DISTANCE 9
 #include <Movement.h> // include movement library
 
 Movement move(13,12,false); // declare a class, use pins 13 (for left servo) and 12 (for right servo) and choose whether you want to debug or not
@@ -33,6 +34,7 @@ void loop()
       cur_time = millis();
       int left_avg = findLeftIRAvg();
       int right_avg = findRightIRAvg();
+      long distance = ultraMeasuredDistance();
 
       /*
       Serial.print("Left sensor value: ");
@@ -41,8 +43,19 @@ void loop()
       Serial.print(right_avg);
       Serial.println();
       */
-    
-      if(left_avg>700)
+      if(distance < 20)
+      {
+        move.stopDriving();
+        if (debug) Serial.print("wait for car in front of me");
+        delay(500);
+      }
+      
+      if(left_avg>700 && right_avg>700)
+      {
+      //Serial.print("AAAAAAAAAAAAAA");
+      move.moveStraight(3,'f',8);
+      }
+      else if(left_avg>700)
       {
         if (debug) Serial.println("line on left side, turn a bit left");
         move.turn(20,'l',3);
@@ -75,7 +88,7 @@ void loop()
       }
       
       // if there's 900ms that no changes are made, speed up
-      if(cur_time - last_time2 > 900)
+      if(cur_time - last_time2 > 500)
       {
           last_time2 = millis();
           speed_factor = speed_factor + 1;
@@ -113,4 +126,16 @@ int findRightIRAvg()
   return right_avg;
 }
 
+long ultraMeasuredDistance() {
+    long duration;
+    pinMode(9, OUTPUT);
+    digitalWrite(9, LOW);
+    delayMicroseconds(2);//2
+    digitalWrite(9, HIGH);
+    delayMicroseconds(5);//5
+    digitalWrite(9, LOW);  
+    pinMode(9, INPUT);
+    duration = pulseIn(9, HIGH);
+    return duration/29/2;
+  }
 
