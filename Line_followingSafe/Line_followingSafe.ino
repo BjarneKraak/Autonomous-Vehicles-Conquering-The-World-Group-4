@@ -32,8 +32,9 @@ void loop()
 
       if(distance< 30){
       move.stopDriving();
-      delay(500000);
-      Serial.print("AAAAAAAAAAAAAA");}
+      delay(500);
+      //Serial.print("AAAAAAAAAAAAAA");
+      }
       
       if(left_avg>700 && right_avg>700){
       //Serial.print("AAAAAAAAAAAAAA");
