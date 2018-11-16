@@ -1,14 +1,32 @@
 #include <Movement.h> // include header file
 
-Movement::Movement(int left_servo_pin, int right_servo_pin, bool debug){
+Movement::Movement(int left_servo_pin, int right_servo_pin, int robot_number, bool debug){
   _left_servo_pin = left_servo_pin; //copy variables to private variables so they can be used in all functions
   _right_servo_pin = right_servo_pin;
+  _robot_number = robot_number;
   _debug = debug;
 }
 
 void Movement::begin(int baudrate){ // begin
   servo_left.attach(_left_servo_pin); //attach left servo
   servo_right.attach(_right_servo_pin); //attach right servo
+  if (_robot_number == 1){
+    _speed_offset_left = 1530; 
+    _speed_offset_right = 1520;
+  }
+  else if (_robot_number == 2){
+    _speed_offset_left = 1475;
+    _speed_offset_right = 1475;
+  }
+  else if (_robot_number == 3){
+    _speed_offset_left = 1475;
+    _speed_offset_right = 1475;
+  }
+  else{
+    _speed_offset_left = 1500;
+    _speed_offset_right = 1500;
+  }
+  
   if (_debug){ // if debug is on
     Serial.begin(baudrate); // initiate serial communicatian
     Serial.println("Movement library initiated"); //print
@@ -94,8 +112,10 @@ void Movement::turnInf(char turn_dir, int speed_factor){
 }
 
 void Movement::stopDriving(){
-  servo_left.write(90);
-  servo_right.write(90);
+  //servo_left.write(90);
+  //servo_right.write(90);
+  servo_left.writeMicroseconds(_speed_offset_left);   // Set Left servo speed
+  servo_right.writeMicroseconds(_speed_offset_right);
   if (_debug){// if debug is on, print following:
     Serial.println("stopped with driving");
   }
@@ -104,8 +124,8 @@ void Movement::stopDriving(){
 void Movement::maneuver(int speed_left, int speed_right, int ms_time){
   // speedLeft, speedRight ranges: Backward  Linear  Stop  Linear   Forward
   //                               -200      -100......0......100       200
-  servo_left.writeMicroseconds(1500 + speed_left);   // Set Left servo speed
-  servo_right.writeMicroseconds(1500 - speed_right); // Set right servo speed
+  servo_left.writeMicroseconds(_speed_offset_left + speed_left);   // Set Left servo speed
+  servo_right.writeMicroseconds(_speed_offset_right - speed_right); // Set right servo speed
   delay(ms_time);                                   // Delay for msTime
 }
 
@@ -120,6 +140,6 @@ int Movement::findSpeedTime(int speed_factor){
     speed_factor = 10;
   }
   int speed_time;
-  speed_time = map(speedfactor, 0, 10, 0, 200);
+  speed_time = map(speed_factor, 0, 10, 0, 200);
   return speed_time;
 }
