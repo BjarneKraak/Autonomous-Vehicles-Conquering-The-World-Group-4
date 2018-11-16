@@ -7,7 +7,7 @@
 class Movement{
 	public:
     //constructor
-		Movement(int left_servo_pin, int right_servo_pin, int _robot_number = 2, bool debug=false);
+		Movement(int left_servo_pin, int right_servo_pin, bool debug=false);
 
     //public methods:
     void begin(int baudrate = 9600);
@@ -26,10 +26,7 @@ class Movement{
     //private variables
     int _left_servo_pin;
     int _right_servo_pin;
-    int _robot_number;
     int _debug;
-    int _speed_offset_left;
-    int _speed_offset_right;
 
 		//private functions
 		int findSpeedTime(int speed_factor);
