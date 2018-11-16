@@ -25,8 +25,12 @@ void loop()
       Serial.print("; right sensor value: ");
       Serial.print(right_avg);
       Serial.println();
-    
-      if(left_avg>700){
+
+      if(left_avg>700 && right_avg>700){
+      Serial.print("AAAAAAAAAAAAAA");
+      move.moveStraight(50,'f');
+      }
+      else if(left_avg>700){
         move.turn(20,'l');
         }
       else if(right_avg>700){
