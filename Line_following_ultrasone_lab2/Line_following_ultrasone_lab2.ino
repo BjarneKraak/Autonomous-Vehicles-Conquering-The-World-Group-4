@@ -35,6 +35,8 @@ bool adjustment = false;
 
 const int debug = false;
 
+int entered_main_loop = true;
+
 void setup() 
 {
   // initialize serial communication:
@@ -45,12 +47,18 @@ void setup()
   last_time = millis();
   last_time2 = millis();
 
+  move.stopDriving();
   xbee_init();
   Serial.println("This is the XBee - Broadcast program.");
+  Serial.println("I am robot 3");
 }
 
 void loop()
 {
+      if (entered_main_loop){
+        //Serial.println("start main loop");
+        entered_main_loop = false;
+      }
       move.driveInf('f', speed_factor); //drive forward with current chosen speed
       cur_time = millis(); // save current time
       //find sensor values for IR sensors:
@@ -177,29 +185,54 @@ void xbee_init(void)
 void arrivedAtCrossing()
 {
   move.stopDriving();
-  Serial.print(ATCROSSING);
+  //Serial.print(ATCROSSING);
   while (Serial.available()>0) {
     int crap = Serial.read();
-    //delay(random(50,500));
   }
   //channel is free
   Serial.print(ATCROSSING); // robot is at crossing
-  delay(4000);
     
   //listen for data:
   int incomingByte = 0;
-  Serial.println(Serial.available());
- while (incomingByte == 0) {
+  while (incomingByte == 0) {
     if (Serial.available()>0){
       // read the incoming data from the serial connection
       incomingByte = Serial.read();
     }
   }
   // incommingByte == ATCROSSING
-  Serial.println("Exited while loop");
-  move.driveInf('f'); //drive 20cm at speed 7  
-  delay(2000);
-  move.stopDriving();
+  move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
+  goSimpleLineFollowing();
+}
+
+void goSimpleLineFollowing()
+{
+  int crossing_counter = 2;
+  while(crossing_counter>0)
+  { 
+    move.driveInf('f', 8);
+    int left_avg = findLeftIRAvg();
+    int right_avg = findRightIRAvg();
+    
+    if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
+    {
+      crossing_counter--;
+      //Serial.println("Crossing is detected, cross line");
+      move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
+    }
+    else if(left_avg>700) // if there's a line on the left side
+    {
+      if (debug) Serial.println("line on left side, turn a bit left");
+      move.turn(20,'l',3); // turn a bit to the left
+    }
+    else if(right_avg>700) // if there's a line on the right side
+    {
+      if (debug) Serial.println("line on left right, turn a bit right");
+      move.turn(20,'r',3); // turn a bit to the right
+    }
+  }
+  entered_main_loop = true;
+      
 }
 
 
