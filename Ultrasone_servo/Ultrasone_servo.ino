@@ -1,5 +1,4 @@
 #include <Servo.h> 
-
 Servo USServo;        // Create Servo object to control the servo 
 
 void setup() { 
@@ -7,11 +6,32 @@ void setup() {
 } 
 
 void loop() {
-   
- // USServo.write(125);   // Rotate servo counter left
- // delay(2000);          // Wait 2 seconds
- USServo.write(55);     // Rotate servo right
- delay(2000);
-  USServo.write(90);    // Rotate servo to center
-  delay(2000); 
+   turnServo('l');
+   delay(1000);
+   turnServo('r');
+   delay(1000);
+   turnServo('c');
+   delay(1000);
 }
+
+void turnServo(char dir)
+{
+  switch (dir){
+    case 'l':
+    {
+      USServo.write(125);   // Rotate servo counter left
+      break;
+    }
+    case 'r':
+    {
+      USServo.write(55);     // Rotate servo right
+      break;
+    }
+    case 'c':
+    {
+      USServo.write(90);    // Rotate servo to center
+      break;
+    }
+  }
+}
+
