@@ -2,7 +2,27 @@
 #define LEFT_SENSOR A0
 #define RIGHT_SENSOR A1
 #define DISTANCE 9 // sensor pin ultrasone
+#define ATCROSSING 1 
+#define DRIVING 0
 #include <Movement.h> // include movement library
+
+// configure the next line with a unique ID number for every robot!
+#define SELF     3
+
+// Define the pan (personal area network) number
+// It must be unique for every team and the same for all robots in one team!
+// For team number N use: "A00N"
+#define PAN_ID           "A004"
+
+// define a channel ID to use for communication
+// It must be the same for all robots in one team!
+// It is represented by a 2-digit hexadecimal number between 0B and 1F.
+#define CHANNEL_ID       "D"
+
+
+// some macros needed for the xbee_init function. Do not touch :-).
+#define STRING(name) #name
+#define TOSTRING(x) STRING(x)
 
 Movement move(13,12,false); // declare a class, use pins 13 (for left servo) and 12 (for right servo) and choose whether you want to debug or not
 
@@ -13,7 +33,9 @@ long last_time2; //takes track of last time a turn was taken or speed was increa
 int speed_factor = 4; //initial value for speed, range between 0 and 10
 bool adjustment = false;
 
-const int debug = true;
+const int debug = false;
+
+int entered_main_loop = true;
 
 void setup() 
 {
@@ -24,12 +46,18 @@ void setup()
   // initalize last_time values with current time
   last_time = millis();
   last_time2 = millis();
+
+  move.stopDriving();
+  xbee_init();
+  Serial.println("This is the XBee - Broadcast program.");
 }
 
 void loop()
 {
-    while(1) // infinite while loop
-    {
+      if (entered_main_loop){
+        //Serial.println("start main loop");
+        entered_main_loop = false;
+      }
       move.driveInf('f', speed_factor); //drive forward with current chosen speed
       cur_time = millis(); // save current time
       //find sensor values for IR sensors:
@@ -38,26 +66,21 @@ void loop()
       //find distance with ultrasone sensor:
       long distance = ultraMeasuredDistance();
       
-      if(distance < 26) //if car in front is too close
+      if(distance < 25) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
         delay(500);  // wait for 500 ms
       }
-
-      /* no crossings in lab test
-      if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
-      {
-        if (debug) Serial.print("Crossing is detected, cross line");
-        move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
-      }
-      else 
       
-      */
-      if(left_avg>700) // if there's a line on the left side
+      if(left_avg>700 && right_avg>700) // crossing is near
+      {
+        //Serial.write("Arrived at crossing");
+        arrivedAtCrossing();
+      }
+      else if(left_avg>700) // if there's a line on the left side
       {
         if (debug) Serial.println("line on left side, turn a bit left");
-        //move.moveStraight(2,'b',8);
         move.turn(20,'l',3); // turn a bit to the left
         adjustment = true; //adjustment is made
       }
@@ -98,7 +121,6 @@ void loop()
             Serial.println(speed_factor);
           }
       }
-    }
 }
 
 int findLeftIRAvg() //calculate the average of 10 readings
@@ -137,3 +159,24 @@ long ultraMeasuredDistance() {
     duration = pulseIn(9, HIGH); //receive duration
     return duration/29/2; //calculate distance based on time
   }
+
+void xbee_init(void)
+{
+  Serial.begin(9600);                         // set the baud rate to 9600 to match the baud rate of the xbee module
+  Serial.flush();                             // make sure the buffer of the serial connection is empty
+  Serial.print("+++");                        // sending the characters '+++' will bring the XBee module in its command mode (see https://cdn.sparkfun.com/assets/resources/2/9/22AT_Commands.pdf)
+  delay(2000);                                // it will only go in command mode if there is a long enough pause after the '+++' characters. Wait two seconds.
+  Serial.print("ATCH " CHANNEL_ID "\r");      // set the channel to CHANNEL_ID
+  Serial.print("ATID " PAN_ID "\r");          // set the network PAN ID to PAN_ID
+  Serial.print("ATMY " TOSTRING(SELF) "\r");  // set the network ID of this module to SELF
+  Serial.print("ATDH 0000\rATDL FFFF\r");     // configure the modue to broadcast all messages to all other nodes in the PAN
+  Serial.print("ATCN\r");                     // exit command mode and return to transparent mode, communicate all data on the serial link onto the wireless network
+}
+
+void arrivedAtCrossing()
+{
+  delay(1000)
+}
+
+
+

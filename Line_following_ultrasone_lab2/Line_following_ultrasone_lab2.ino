@@ -2,7 +2,7 @@
 #define LEFT_SENSOR A0
 #define RIGHT_SENSOR A1
 #define DISTANCE 9 // sensor pin ultrasone
-#define ATCROSSING 1 
+#define ATCROSSING 1
 #define DRIVING 0
 
 #include <Movement.h> // include movement library
@@ -41,7 +41,7 @@ const int debug = false;
 
 int entered_main_loop = true;
 
-void setup() 
+void setup()
 {
   // initialize serial communication:
   // Needed to enable printing debug information
@@ -55,7 +55,7 @@ void setup()
   xbee_init();
   Serial.println("This is the XBee - Broadcast program.");
   Serial.println("I am robot 3");
-  
+
   // Servo is connected to digital pin 11
   USServo.attach(11);  // Servo is connected to digital pin 11
 }
@@ -82,14 +82,14 @@ void loop()
       Serial.print(right_avg);
       Serial.println();
       */
-      
-      if(distance < 20) //if car in front is too close
+
+      if(distance < 25) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
         delay(500);  // wait for 500 ms
       }
-      
+
       if(left_avg>700 && right_avg>700) // crossing is near
       {
         //Serial.write("Arrived at crossing");
@@ -109,13 +109,13 @@ void loop()
         adjustment = true; //adjustment is made
         USServo.write(55);   // Rotate servo counter right
       }
-      
+
       if(adjustment) //if adjustments are made
       {
         adjustment = false; //for next time
         last_time = cur_time; //save last_time as current time
         last_time2 = cur_time;
-        
+
         if ( cur_time - last_time < 1000) // decrease speed if time between turnings is small
         {
           speed_factor = speed_factor - 2; //decrease speed quite quick
@@ -127,11 +127,11 @@ void loop()
           }
         }
       }
-      
+
       // if there's 700ms that no changes are made, speed up
       if(cur_time - last_time2 > 700)
       {
-          last_time2 = millis(); 
+          last_time2 = millis();
           speed_factor = speed_factor + 1; //increase speed quite slow
           if (speed_factor<3) speed_factor = 2;//min 2
           if (speed_factor>7) speed_factor = 7;// max 7
@@ -169,7 +169,7 @@ int findRightIRAvg() //calculate the average of 10 readings
 long ultraMeasuredDistance() {
     long duration;
     pinMode(9, OUTPUT); //first trigger sensor, so output needed
-    digitalWrite(9, LOW); 
+    digitalWrite(9, LOW);
     delayMicroseconds(2);//2
     digitalWrite(9, HIGH); //trigger sensor
     delayMicroseconds(5);//5
@@ -201,7 +201,7 @@ void arrivedAtCrossing()
   }
   //channel is free
   Serial.print(ATCROSSING); // robot is at crossing
-    
+
   //listen for data:
   int incomingByte = 0;
   while (incomingByte == 0) {
@@ -219,11 +219,11 @@ void goSimpleLineFollowing()
 {
   int crossing_counter = 2;
   while(crossing_counter>0)
-  { 
+  {
     move.driveInf('f', 8);
     int left_avg = findLeftIRAvg();
     int right_avg = findRightIRAvg();
-    
+
     if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
     {
       crossing_counter--;
@@ -242,5 +242,5 @@ void goSimpleLineFollowing()
     }
   }
   entered_main_loop = true;
-      
+
 }
