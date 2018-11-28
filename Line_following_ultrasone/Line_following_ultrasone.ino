@@ -37,30 +37,27 @@ void loop()
       int right_avg = findRightIRAvg();
       //find distance with ultrasone sensor:
       long distance = ultraMeasuredDistance();
-
-      /*
-      Serial.print("Left sensor value: ");
-      Serial.print(left_avg);
-      Serial.print("; right sensor value: ");
-      Serial.print(right_avg);
-      Serial.println();
-      */
       
-      if(distance < 20) //if car in front is too close
+      if(distance < 26) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
         delay(500);  // wait for 500 ms
       }
-      
+
+      /* no crossings in lab test
       if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
       {
         if (debug) Serial.print("Crossing is detected, cross line");
         move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
       }
-      else if(left_avg>700) // if there's a line on the left side
+      else 
+      
+      */
+      if(left_avg>700) // if there's a line on the left side
       {
         if (debug) Serial.println("line on left side, turn a bit left");
+        //move.moveStraight(2,'b',8);
         move.turn(20,'l',3); // turn a bit to the left
         adjustment = true; //adjustment is made
       }

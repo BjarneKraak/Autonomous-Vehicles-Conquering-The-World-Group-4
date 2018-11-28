@@ -50,7 +50,6 @@ void setup()
   move.stopDriving();
   xbee_init();
   Serial.println("This is the XBee - Broadcast program.");
-  Serial.println("I am robot 3");
 }
 
 void loop()
@@ -65,7 +64,7 @@ void loop()
       int left_avg = findLeftIRAvg();
       int right_avg = findRightIRAvg();
       //find distance with ultrasone sensor:
-      long distance = 30; // ultraMeasuredDistance();
+      long distance = ultraMeasuredDistance();
 
       /*
       Serial.print("Left sensor value: ");
@@ -75,7 +74,7 @@ void loop()
       Serial.println();
       */
       
-      if(distance < 20) //if car in front is too close
+      if(distance < 25) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
