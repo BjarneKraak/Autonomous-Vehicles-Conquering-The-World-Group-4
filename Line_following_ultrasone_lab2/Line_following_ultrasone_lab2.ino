@@ -1,14 +1,15 @@
 
 #define LEFT_SENSOR A0
 #define RIGHT_SENSOR A1
+#define ULTRASONE_SERVO 11 //
 #define DISTANCE 9 // sensor pin ultrasone
 #define ATCROSSING 1
 #define DRIVING 0
 
 #include <Movement.h> // include movement library
-#include <Servo.h>
-// Create Servo object to control the servo
-Servo USServo
+
+#include <Servo.h> 
+Servo USServo;        // Create Servo object to control the servo 
 
 // configure the next line with a unique ID number for every robot!
 #define SELF     3
@@ -34,6 +35,7 @@ Movement move(13,12,false); // declare a class, use pins 13 (for left servo) and
 long cur_time; // takes track of current time
 long last_time; //takes track of last time a turn was taken
 long last_time2; //takes track of last time a turn was taken or speed was increased
+long last_time3; //takes track of last time a turn of the head was taken
 int speed_factor = 4; //initial value for speed, range between 0 and 10
 bool adjustment = false;
 
@@ -50,14 +52,13 @@ void setup()
   // initalize last_time values with current time
   last_time = millis();
   last_time2 = millis();
+  last_time3 = millis();
 
   move.stopDriving();
   xbee_init();
   Serial.println("This is the XBee - Broadcast program.");
-  Serial.println("I am robot 3");
-
-  // Servo is connected to digital pin 11
-  USServo.attach(11);  // Servo is connected to digital pin 11
+  USServo.attach(ULTRASONE_SERVO);  // Servo is connected to digital pin 11
+  turnServo('c');
 }
 
 void loop()
@@ -72,22 +73,13 @@ void loop()
       int left_avg = findLeftIRAvg();
       int right_avg = findRightIRAvg();
       //find distance with ultrasone sensor:
-      long distance = 30; // ultraMeasuredDistance();
-      USServo.write(90);
+      long distance = ultraMeasuredDistance();
 
-      /*
-      Serial.print("Left sensor value: ");
-      Serial.print(left_avg);
-      Serial.print("; right sensor value: ");
-      Serial.print(right_avg);
-      Serial.println();
-      */
-
-      if(distance < 25) //if car in front is too close
+      if(distance < 15) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
-        delay(500);  // wait for 500 ms
+        delay(1500);  // wait for 500 ms
       }
 
       if(left_avg>700 && right_avg>700) // crossing is near
@@ -99,17 +91,26 @@ void loop()
       {
         if (debug) Serial.println("line on left side, turn a bit left");
         move.turn(20,'l',3); // turn a bit to the left
+        turnServo('l');
+        last_time3 = millis();
         adjustment = true; //adjustment is made
-        USServo.write(125);   // Rotate servo counter left
       }
       else if(right_avg>700) // if there's a line on the right side
       {
         if (debug) Serial.println("line on left right, turn a bit right");
         move.turn(20,'r',3); // turn a bit to the right
+        turnServo('r');
+        last_time3 = millis();
         adjustment = true; //adjustment is made
-        USServo.write(55);   // Rotate servo counter right
       }
 
+      if (cur_time - last_time3 > 700)
+      {
+        last_time3 = cur_time;
+        Serial.println("turn head back");
+        turnServo('c');
+      }
+      
       if(adjustment) //if adjustments are made
       {
         adjustment = false; //for next time
@@ -195,6 +196,7 @@ void xbee_init(void)
 void arrivedAtCrossing()
 {
   move.stopDriving();
+  turnServo('c');
   //Serial.print(ATCROSSING);
   while (Serial.available()>0) {
     int crap = Serial.read();
@@ -204,7 +206,7 @@ void arrivedAtCrossing()
 
   //listen for data:
   int incomingByte = 0;
-  while (incomingByte == 0) {
+  while (incomingByte != '1') {
     if (Serial.available()>0){
       // read the incoming data from the serial connection
       incomingByte = Serial.read();
@@ -243,4 +245,25 @@ void goSimpleLineFollowing()
   }
   entered_main_loop = true;
 
+}
+
+void turnServo(char dir)
+{
+  switch (dir){
+    case 'l':
+    {
+      USServo.write(125);   // Rotate servo counter left
+      break;
+    }
+    case 'r':
+    {
+      USServo.write(55);     // Rotate servo right
+      break;
+    }
+    case 'c':
+    {
+      USServo.write(90);    // Rotate servo to center
+      break;
+    }
+  }
 }
