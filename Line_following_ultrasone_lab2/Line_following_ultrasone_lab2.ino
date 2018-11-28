@@ -225,6 +225,14 @@ void goSimpleLineFollowing()
     move.driveInf('f', 8);
     int left_avg = findLeftIRAvg();
     int right_avg = findRightIRAvg();
+    long distance = ultraMeasuredDistance();
+
+    if(distance < 15) //if car in front is too close
+    {
+      move.stopDriving(); // stop driving
+      if (debug) Serial.print("wait for car in front of me");
+      delay(1500);  // wait for 500 ms
+    }
 
     if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
     {
