@@ -4,7 +4,11 @@
 #define DISTANCE 9 // sensor pin ultrasone
 #define ATCROSSING 1 
 #define DRIVING 0
+
 #include <Movement.h> // include movement library
+#include <Servo.h>
+// Create Servo object to control the servo
+Servo USServo
 
 // configure the next line with a unique ID number for every robot!
 #define SELF     3
@@ -51,6 +55,9 @@ void setup()
   xbee_init();
   Serial.println("This is the XBee - Broadcast program.");
   Serial.println("I am robot 3");
+  
+  // Servo is connected to digital pin 11
+  USServo.attach(11);  // Servo is connected to digital pin 11
 }
 
 void loop()
@@ -66,6 +73,7 @@ void loop()
       int right_avg = findRightIRAvg();
       //find distance with ultrasone sensor:
       long distance = 30; // ultraMeasuredDistance();
+      USServo.write(90);
 
       /*
       Serial.print("Left sensor value: ");
@@ -92,12 +100,14 @@ void loop()
         if (debug) Serial.println("line on left side, turn a bit left");
         move.turn(20,'l',3); // turn a bit to the left
         adjustment = true; //adjustment is made
+        USServo.write(125);   // Rotate servo counter left
       }
       else if(right_avg>700) // if there's a line on the right side
       {
         if (debug) Serial.println("line on left right, turn a bit right");
         move.turn(20,'r',3); // turn a bit to the right
         adjustment = true; //adjustment is made
+        USServo.write(55);   // Rotate servo counter right
       }
       
       if(adjustment) //if adjustments are made
@@ -234,5 +244,3 @@ void goSimpleLineFollowing()
   entered_main_loop = true;
       
 }
-
-
