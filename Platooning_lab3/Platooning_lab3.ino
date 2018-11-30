@@ -5,6 +5,7 @@
 #define DISTANCE 9 // sensor pin ultrasone
 #define ATCROSSING 1 
 #define DRIVING 0
+#define WAIT_TIME 3000
 #include <Movement.h> // include movement library
 
 #include <Servo.h> 
@@ -38,7 +39,7 @@ long last_time3;
 int speed_factor = 4; //initial value for speed, range between 0 and 10
 bool adjustment = false;
 bool leader = true;
-bool initial = false;
+bool initial = true;
 
 const int debug = false;
 
@@ -70,10 +71,11 @@ void loop()
           while (Serial.available()>0){
            // read the incoming data from the serial connection
             incoming_byte = Serial.read();
-            if (incoming_byte == '1')
+            if (incoming_byte == '2')
             {
                initial = false;
                leader = false;
+               Serial.println("I'm not the leader");
             }
           }
       }
@@ -85,29 +87,50 @@ void loop()
       int right_avg = findRightIRAvg();
       //find distance with ultrasone sensor:
       long distance = ultraMeasuredDistance();
+
       
       if(distance < 10) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
-        delay(500);  // wait for 500 ms
+        while(ultraMeasuredDistance()< 20)
+        {
+          delay(100);
+        }
+      }
+      if(distance < 15) //if car in front is too close
+      {
+          speed_factor--;
+      }
+      if(distance >30) //if car in front is too far away
+      {
+          speed_factor++;
       }
       
-      else if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
+      if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
       {
         if (initial)
         {
-          Serial.print(ATCROSSING);
+          move.stopDriving();
+          Serial.println("I'm the leader, wait");
+          initial = false;
+          
+          Serial.print(2);
+          delay(WAIT_TIME); //wait ten seconds
+          move.moveStraight(4,'f',5);
         }
         else // not initial state
         {
           if (leader)
           {
-            Serial.print(ATCROSSING);
+            move.stopDriving();
+            Serial.println("leader: wait 10s");
+            delay(WAIT_TIME);
+            move.moveStraight(4,'f',5);
           }
-          else
+          else // if not the leader
           {
-            if (debug) Serial.print("Crossing is detected, cross line");
+            Serial.print("not leader: Crossing is detected, cross line");
             move.moveStraight(4,'f',5); //move straight for 3 cm before checking IR sensors again
           }
         }
@@ -116,7 +139,7 @@ void loop()
       else if(left_avg>700) // if there's a line on the left side
       {
         if (debug) Serial.println("line on left side, turn a bit left");
-        move.turn(20,'l',3); // turn a bit to the left
+        move.turn(10,'l',5); // turn a bit to the left
         turnServo('l');
         last_time3 = millis();
         adjustment = true; //adjustment is made
@@ -124,7 +147,7 @@ void loop()
       else if(right_avg>700) // if there's a line on the right side
       {
         if (debug) Serial.println("line on left right, turn a bit right");
-        move.turn(20,'r',3); // turn a bit to the right
+        move.turn(10,'r',5); // turn a bit to the right
         turnServo('r');
         last_time3 = millis();
         adjustment = true; //adjustment is made
@@ -133,7 +156,6 @@ void loop()
       if (cur_time - last_time3 > 700)
       {
         last_time3 = cur_time;
-        Serial.println("turn head back");
         turnServo('c');
       }
       
@@ -145,8 +167,8 @@ void loop()
         
         if ( cur_time - last_time < 1000) // decrease speed if time between turnings is small
         {
-          speed_factor = speed_factor - 2; //decrease speed quite quick
-          if (speed_factor<3) speed_factor = 2; //min 2
+          speed_factor = speed_factor - 1; //decrease speed quite quick
+          if (speed_factor<3) speed_factor = 4; //min 2
           if (speed_factor>7) speed_factor = 7; // max 7
           if (debug){
             Serial.print("time between turnings is small, slow down till speedfactor: ");
@@ -160,7 +182,7 @@ void loop()
       {   
           last_time2 = millis(); 
           speed_factor = speed_factor + 1; //increase speed quite slow
-          if (speed_factor<3) speed_factor = 2;//min 2
+          if (speed_factor<3) speed_factor = 4;//min 2
           if (speed_factor>7) speed_factor = 7;// max 7
           if (debug){
             Serial.print("time between turnings is great, speed up till speedfactor: ");
