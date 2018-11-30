@@ -37,6 +37,8 @@ long last_time2; //takes track of last time a turn was taken or speed was increa
 long last_time3;
 int speed_factor = 4; //initial value for speed, range between 0 and 10
 bool adjustment = false;
+bool leader = true;
+bool initial = false;
 
 const int debug = false;
 
@@ -62,11 +64,20 @@ void setup()
 
 void loop()
 {
-      if (entered_main_loop){
-        //Serial.println("start main loop");
-        entered_main_loop = false;
+      if (initial)
+      {
+          int incoming_byte;
+          while (Serial.available()>0){
+           // read the incoming data from the serial connection
+            incoming_byte = Serial.read();
+            if (incoming_byte == '1')
+            {
+               initial = false;
+               leader = false;
+            }
+          }
       }
-      //turnServo('c');
+      
       move.driveInf('f', speed_factor); //drive forward with current chosen speed
       cur_time = millis(); // save current time
       //find sensor values for IR sensors:
@@ -84,9 +95,24 @@ void loop()
       
       else if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
       {
-        if (debug) Serial.print("Crossing is detected, cross line");
-        move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
+        if (initial)
+        {
+          Serial.print(ATCROSSING);
+        }
+        else // not initial state
+        {
+          if (leader)
+          {
+            Serial.print(ATCROSSING);
+          }
+          else
+          {
+            if (debug) Serial.print("Crossing is detected, cross line");
+            move.moveStraight(4,'f',5); //move straight for 3 cm before checking IR sensors again
+          }
+        }
       }
+      
       else if(left_avg>700) // if there's a line on the left side
       {
         if (debug) Serial.println("line on left side, turn a bit left");
