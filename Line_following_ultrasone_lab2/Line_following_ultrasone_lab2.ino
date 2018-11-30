@@ -107,7 +107,7 @@ void loop()
       if (cur_time - last_time3 > 700)
       {
         last_time3 = cur_time;
-        Serial.println("turn head back");
+        //Serial.println("turn head back");
         turnServo('c');
       }
       
@@ -222,7 +222,7 @@ void goSimpleLineFollowing()
   int crossing_counter = 2;
   while(crossing_counter>0)
   {
-    move.driveInf('f', 8);
+    move.driveInf('f', 4);
     int left_avg = findLeftIRAvg();
     int right_avg = findRightIRAvg();
     long distance = ultraMeasuredDistance();
