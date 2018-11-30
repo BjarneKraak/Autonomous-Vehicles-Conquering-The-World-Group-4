@@ -41,7 +41,7 @@ void Movement::moveStraight(int distance, char drive_dir, int speed_factor){
 
 void Movement::turn(int angle, char turn_dir, int speed_factor){ // turning function, angle and direction needs to be entered
   int speed_time = findSpeedTime(speed_factor);
-  int turn_time = ((angle * 6.0)); // variable that contains time to turn depended on angle
+  int turn_time = ((angle * 12.0)); // variable that contains time to turn depended on angle
   if(turn_dir == 'r') { // if robot should turn right
     maneuver(speed_time, 0, turn_time); // turn right for turn_time ms
     maneuver(0, 0, 1); // stop moving
