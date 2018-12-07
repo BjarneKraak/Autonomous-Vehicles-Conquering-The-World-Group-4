@@ -5,7 +5,7 @@
 #define DISTANCE 9 // sensor pin ultrasone
 #define ATCROSSING 1 
 #define DRIVING 0
-#define WAIT_TIME 3000
+#define WAIT_TIME 10000
 #include <Movement.h> // include movement library
 
 #include <Servo.h> 
@@ -40,7 +40,7 @@ int speed_factor = 4; //initial value for speed, range between 0 and 10
 bool adjustment = false;
 bool leader = true;
 bool initial = true;
-
+bool lap1=true; // maybe smth smarter can be done
 const int debug = false;
 
 int entered_main_loop = true;
@@ -92,7 +92,35 @@ void loop()
       long distance = ultraMeasuredDistance();
 
       
-      if(distance < 10) //if car in front is too close
+      if(distance < 25 && leader==false && initial==false) //if car in front is too close
+      {
+          while (Serial.available()>0){
+            int incoming_byte;//maybe we should use an if
+           // read the incoming data from the serial connection
+          incoming_byte = Serial.read();
+              if(incoming_byte=='3'){
+                move.stopDriving();                 
+                while (incoming_byte!='2'){
+                  if(Serial.available()>0){
+                  incoming_byte=Serial.read();}
+                }
+                //Serial.print("Im out");
+              }
+              
+          }
+      } 
+
+      if(distance <10 && leader==true && initial==false){
+        move.stopDriving(); //maybe it is better to make a function
+        Serial.print(3);
+          while(distance<10){            
+             distance=ultraMeasuredDistance();
+           delay(200);
+          }
+        Serial.print(2);
+        }
+
+     if(distance < 17 && lap1==true) //if car in front is too close
       {
         move.stopDriving(); // stop driving
         if (debug) Serial.print("wait for car in front of me");
@@ -101,17 +129,9 @@ void loop()
           delay(100);
         }
       }
-      if(distance < 15) //if car in front is too close
-      {
-          speed_factor--;
-      }
-      if(distance >30) //if car in front is too far away
-      {
-          speed_factor++;
-      }
       
       if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
-      {
+      {lap1=false; //maybe smth smarter can be done
         if (initial)
         {
           move.stopDriving();
@@ -127,8 +147,10 @@ void loop()
           if (leader)
           {
             move.stopDriving();
-            Serial.println("leader: wait 10s");
+            //Serial.println("leader: wait 10s");
+            Serial.print(3);
             delay(WAIT_TIME);
+            Serial.print(2);
             move.moveStraight(4,'f',5);
           }
           else // if not the leader
@@ -142,7 +164,7 @@ void loop()
       else if(left_avg>700) // if there's a line on the left side
       {
         if (debug) Serial.println("line on left side, turn a bit left");
-        move.turn(10,'l',5); // turn a bit to the left
+        move.turn(10,'l',3); // turn a bit to the left
         turnServo('l');
         last_time3 = millis();
         adjustment = true; //adjustment is made
@@ -150,7 +172,7 @@ void loop()
       else if(right_avg>700) // if there's a line on the right side
       {
         if (debug) Serial.println("line on left right, turn a bit right");
-        move.turn(10,'r',5); // turn a bit to the right
+        move.turn(10,'r',3); // turn a bit to the right
         turnServo('r');
         last_time3 = millis();
         adjustment = true; //adjustment is made
@@ -254,12 +276,12 @@ void turnServo(char dir)
   switch (dir){
     case 'l':
     {
-      USServo.write(125);   // Rotate servo counter left
+      USServo.write(110);   // Rotate servo counter left
       break;
     }
     case 'r':
     {
-      USServo.write(55);     // Rotate servo right
+      USServo.write(70);     // Rotate servo right
       break;
     }
     case 'c':
