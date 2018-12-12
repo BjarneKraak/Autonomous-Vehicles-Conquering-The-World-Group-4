@@ -1,47 +1,41 @@
 
-#define LEFT_SENSOR A0
-#define RIGHT_SENSOR A1
-#define ULTRASONE_SERVO 11 //
-#define DISTANCE 9 // sensor pin ultrasone
-#define ATCROSSING 1
-#define DRIVING 0
+#define LEFT_SENSOR A0 //left IR sensor pin
+#define RIGHT_SENSOR A1 //right IR sensor pin
+#define ULTRASONIC_SERVO 11 //servo pin for turning ultrasonic sensor
+#define DISTANCE 9 // servo pin for ultrasonic sensor
 
-#include <Movement.h> // include movement library
-
+//include code for turning ultrasonic sensor
 #include <Servo.h> 
 Servo USServo;        // Create Servo object to control the servo 
 
-// configure the next line with a unique ID number for every robot!
-#define SELF     3
+//information for initializing zigbee module:
+    // configure the next line with a unique ID number for every robot!
+    #define SELF     1
+    
+    // Define the pan (personal area network) number
+    // It must be unique for every team and the same for all robots in one team!
+    // For team number N use: "A00N"
+    #define PAN_ID           "A004"
+    
+    // define a channel ID to use for communication
+    // It must be the same for all robots in one team!
+    // It is represented by a 2-digit hexadecimal number between 0B and 1F.
+    #define CHANNEL_ID       "D"
+    
+    
+    // some macros needed for the xbee_init function. Do not touch :-).
+    #define STRING(name) #name
+    #define TOSTRING(x) STRING(x)
 
-// Define the pan (personal area network) number
-// It must be unique for every team and the same for all robots in one team!
-// For team number N use: "A00N"
-#define PAN_ID           "A004"
-
-// define a channel ID to use for communication
-// It must be the same for all robots in one team!
-// It is represented by a 2-digit hexadecimal number between 0B and 1F.
-#define CHANNEL_ID       "D"
-
-
-// some macros needed for the xbee_init function. Do not touch :-).
-#define STRING(name) #name
-#define TOSTRING(x) STRING(x)
-
+//code for moving
+#include <Movement.h> // include movement library
 Movement move(13,12,false); // declare a class, use pins 13 (for left servo) and 12 (for right servo) and choose whether you want to debug or not
 
 //global variables:
 long cur_time; // takes track of current time
 long last_time; //takes track of last time a turn was taken
-long last_time2; //takes track of last time a turn was taken or speed was increased
-long last_time3; //takes track of last time a turn of the head was taken
-int speed_factor = 4; //initial value for speed, range between 0 and 10
-bool adjustment = false;
-
-const int debug = false;
-
-int entered_main_loop = true;
+int speed_factor = 8; //initial value for speed, range between 0 and 10
+const int debug = false; //if debugging is turned on, many print statements will be executed
 
 void setup()
 {
@@ -49,98 +43,50 @@ void setup()
   // Needed to enable printing debug information
   Serial.begin(9600);
   move.begin(9600);
-  // initalize last_time values with current time
-  last_time = millis();
-  last_time2 = millis();
-  last_time3 = millis();
-
-  move.stopDriving();
+  last_time = millis(); // initalize last_time value with current time
+  move.stopDriving(); // make sure the robot doesn't move
   xbee_init();
-  Serial.println("This is the XBee - Broadcast program.");
-  USServo.attach(ULTRASONE_SERVO);  // Servo is connected to digital pin 11
-  turnServo('c');
+  Serial.println("This is the lab_4 algorithm");
+  USServo.attach(ULTRASONIC_SERVO);  // Servo is connected to digital pin 11
+  turnHead(0,'l'); // turn head to center (zero degrees to the left)
 }
 
 void loop()
 {
-      if (entered_main_loop){
-        //Serial.println("start main loop");
-        entered_main_loop = false;
-      }
-      move.driveInf('f', speed_factor); //drive forward with current chosen speed
-      cur_time = millis(); // save current time
-      //find sensor values for IR sensors:
-      int left_avg = findLeftIRAvg();
-      int right_avg = findRightIRAvg();
-      //find distance with ultrasone sensor:
-      long distance = ultraMeasuredDistance();
+  move.driveInf('f', speed_factor); //drive forward with current chosen speed
+  cur_time = millis(); // save current time
+  
+  //find sensor values for IR sensors and ultrasonic Distance:
+  int left_avg = findLeftIRAvg();
+  int right_avg = findRightIRAvg();
+  long distance = ultraMeasuredDistance();
 
-      if(distance < 15) //if car in front is too close
-      {
-        move.stopDriving(); // stop driving
-        if (debug) Serial.print("wait for car in front of me");
-        delay(1500);  // wait for 500 ms
-      }
+  if(distance < 15) //if car in front is too close
+  {
+    move.stopDriving(); // stop driving
+    delay(1000);
+    if (debug) Serial.print("wait for object in front of me");
+  }
 
-      if(left_avg>700 && right_avg>700) // crossing is near
-      {
-        //Serial.write("Arrived at crossing");
-        arrivedAtCrossing();
-      }
-      else if(left_avg>700) // if there's a line on the left side
-      {
-        if (debug) Serial.println("line on left side, turn a bit left");
-        move.turn(20,'l',3); // turn a bit to the left
-        turnServo('l');
-        last_time3 = millis();
-        adjustment = true; //adjustment is made
-      }
-      else if(right_avg>700) // if there's a line on the right side
-      {
-        if (debug) Serial.println("line on left right, turn a bit right");
-        move.turn(20,'r',3); // turn a bit to the right
-        turnServo('r');
-        last_time3 = millis();
-        adjustment = true; //adjustment is made
-      }
+  if(left_avg>700) // if there's a line on the left side
+  {
+    if (debug) Serial.println("line on left side detected");
+    move.moveStraight(10, 'b', 8);
+    move.turn(40,'r',5); // turn a bit to the left
 
-      if (cur_time - last_time3 > 700)
-      {
-        last_time3 = cur_time;
-        //Serial.println("turn head back");
-        turnServo('c');
-      }
-      
-      if(adjustment) //if adjustments are made
-      {
-        adjustment = false; //for next time
-        last_time = cur_time; //save last_time as current time
-        last_time2 = cur_time;
+  }
+  else if(right_avg>700) // if there's a line on the right side
+  {
+    if (debug) Serial.println("line on left right detected");
+    move.moveStraight(10, 'b', 8);
+    move.turn(40,'l',5); // turn a bit to the right
+  }
 
-        if ( cur_time - last_time < 1000) // decrease speed if time between turnings is small
-        {
-          speed_factor = speed_factor - 2; //decrease speed quite quick
-          if (speed_factor<3) speed_factor = 2; //min 2
-          if (speed_factor>7) speed_factor = 7; // max 7
-          if (debug){
-            Serial.print("time between turnings is small, slow down till speedfactor: ");
-            Serial.println(speed_factor);
-          }
-        }
-      }
-
-      // if there's 700ms that no changes are made, speed up
-      if(cur_time - last_time2 > 700)
-      {
-          last_time2 = millis();
-          speed_factor = speed_factor + 1; //increase speed quite slow
-          if (speed_factor<3) speed_factor = 2;//min 2
-          if (speed_factor>7) speed_factor = 7;// max 7
-          if (debug){
-            Serial.print("time between turnings is great, speed up till speedfactor: ");
-            Serial.println(speed_factor);
-          }
-      }
+  if (cur_time - last_time > 700)
+  {
+    last_time = cur_time;
+    // something to do when time has elapsed
+  }
 }
 
 int findLeftIRAvg() //calculate the average of 10 readings
@@ -196,13 +142,12 @@ void xbee_init(void)
 void arrivedAtCrossing()
 {
   move.stopDriving();
-  turnServo('c');
   //Serial.print(ATCROSSING);
   while (Serial.available()>0) {
     int crap = Serial.read();
   }
   //channel is free
-  Serial.print(ATCROSSING); // robot is at crossing
+  Serial.print('1'); // robot is at crossing
 
   //listen for data:
   int incomingByte = 0;
@@ -231,46 +176,49 @@ void goSimpleLineFollowing()
     {
       move.stopDriving(); // stop driving
       if (debug) Serial.print("wait for car in front of me");
-      delay(1500);  // wait for 500 ms
+      delay(500);  // wait for 500 ms
     }
 
-    if(left_avg>700 && right_avg>700) // if there's a line on both sides aka crossing
+    if(left_avg>700) // if there's a line on the left side
     {
-      crossing_counter--;
-      //Serial.println("Crossing is detected, cross line");
-      move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
-    }
-    else if(left_avg>700) // if there's a line on the left side
-    {
+      move.moveStraight(8, 'b', 8);
       if (debug) Serial.println("line on left side, turn a bit left");
-      move.turn(20,'l',3); // turn a bit to the left
+      move.turn(40,'r',3); // turn a bit to the left
     }
     else if(right_avg>700) // if there's a line on the right side
     {
-      if (debug) Serial.println("line on left right, turn a bit right");
-      move.turn(20,'r',3); // turn a bit to the right
+      move.moveStraight(8, 'b', 8);
+      if (debug) Serial.println("line on left side, turn a bit right");
+      move.turn(20,'l',3); // turn a bit to the right
     }
   }
-  entered_main_loop = true;
-
 }
 
-void turnServo(char dir)
-{
+void turnHead(int angle, char dir){ 
+  if (angle>35)
+  {
+    angle = 35;
+  }
+  if (angle<0){
+    angle = 0;
+  }
   switch (dir){
     case 'l':
     {
-      USServo.write(125);   // Rotate servo counter left
+      if (debug)
+      {
+        Serial.println("turn head to left");
+      }
+      USServo.write(90+angle);   // Rotate servo counter left
       break;
     }
     case 'r':
     {
-      USServo.write(55);     // Rotate servo right
-      break;
-    }
-    case 'c':
-    {
-      USServo.write(90);    // Rotate servo to center
+      if (debug)
+      {
+        Serial.println("turn head to right");
+      }
+      USServo.write(90-angle);     // Rotate servo right
       break;
     }
   }
