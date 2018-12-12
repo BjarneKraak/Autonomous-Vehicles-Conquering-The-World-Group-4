@@ -32,10 +32,13 @@ Servo USServo;        // Create Servo object to control the servo
 Movement move(13,12,false); // declare a class, use pins 13 (for left servo) and 12 (for right servo) and choose whether you want to debug or not
 
 //global variables:
-long cur_time; // takes track of current time
 long last_time; //takes track of last time a turn was taken
 int speed_factor = 8; //initial value for speed, range between 0 and 10
 const int debug = false; //if debugging is turned on, many print statements will be executed
+
+char data; //wireless data
+int head_pos = 90;
+int add_amount = 10;
 
 void setup()
 {
@@ -48,45 +51,68 @@ void setup()
   xbee_init();
   Serial.println("This is the lab_4 algorithm");
   USServo.attach(ULTRASONIC_SERVO);  // Servo is connected to digital pin 11
-  turnHead(0,'l'); // turn head to center (zero degrees to the left)
+  
+  int angle;
+  char turn_dir;
+  computeAngle(head_pos, &angle, &turn_dir);
+  turnHead(angle,turn_dir); // turn head to center (zero degrees to the left)
 }
 
 void loop()
 {
-  move.driveInf('f', speed_factor); //drive forward with current chosen speed
-  cur_time = millis(); // save current time
+  while (Serial.available()>0) 
+  {
+    data = Serial.read();
+  }
+  switch (data)
+  {
+    case 'l':
+    {
+      turnHead(0, 'l');
+      head_pos = 90;
+      move.turnInf('l', 3);
+      break;
+    }
+    case 'r':
+    {
+      turnHead(0, 'l');
+      head_pos = 90;
+      move.turnInf('r', 3);
+      break;
+    }
+    case 'f':
+    {
+      move.driveInf('f',3);
+      sweepHead();
+      break;
+    }
+    case 'b':
+    {
+      turnHead(0, 'l');
+      head_pos = 90;
+      move.driveInf('b',3);
+      break;
+    }
+    case 's':
+    {
+      turnHead(0, 'l');
+      move.stopDriving();
+      break;
+    }
+  }
   
-  //find sensor values for IR sensors and ultrasonic Distance:
-  int left_avg = findLeftIRAvg();
-  int right_avg = findRightIRAvg();
-  long distance = ultraMeasuredDistance();
-
-  if(distance < 15) //if car in front is too close
+  char problem = checkForProblems();
+  if (problem != 'N') //if there's a problem
   {
-    move.stopDriving(); // stop driving
-    delay(1000);
-    if (debug) Serial.print("wait for object in front of me");
-  }
-
-  if(left_avg>700) // if there's a line on the left side
-  {
-    if (debug) Serial.println("line on left side detected");
-    move.moveStraight(10, 'b', 8);
-    move.turn(40,'r',5); // turn a bit to the left
-
-  }
-  else if(right_avg>700) // if there's a line on the right side
-  {
-    if (debug) Serial.println("line on left right detected");
-    move.moveStraight(10, 'b', 8);
-    move.turn(40,'l',5); // turn a bit to the right
-  }
-
-  if (cur_time - last_time > 700)
-  {
-    last_time = cur_time;
-    // something to do when time has elapsed
-  }
+    if (debug) Serial.println("A problem occured");
+    move.stopDriving();
+    Serial.println(problem);
+    while(problem!='N')
+    {
+      problem = checkForProblems();            
+      delay(200);
+    }
+  } 
 }
 
 int findLeftIRAvg() //calculate the average of 10 readings
@@ -139,61 +165,6 @@ void xbee_init(void)
   Serial.print("ATCN\r");                     // exit command mode and return to transparent mode, communicate all data on the serial link onto the wireless network
 }
 
-void arrivedAtCrossing()
-{
-  move.stopDriving();
-  //Serial.print(ATCROSSING);
-  while (Serial.available()>0) {
-    int crap = Serial.read();
-  }
-  //channel is free
-  Serial.print('1'); // robot is at crossing
-
-  //listen for data:
-  int incomingByte = 0;
-  while (incomingByte != '1') {
-    if (Serial.available()>0){
-      // read the incoming data from the serial connection
-      incomingByte = Serial.read();
-    }
-  }
-  // incommingByte == ATCROSSING
-  move.moveStraight(3,'f',8); //move straight for 3 cm before checking IR sensors again
-  goSimpleLineFollowing();
-}
-
-void goSimpleLineFollowing()
-{
-  int crossing_counter = 2;
-  while(crossing_counter>0)
-  {
-    move.driveInf('f', 4);
-    int left_avg = findLeftIRAvg();
-    int right_avg = findRightIRAvg();
-    long distance = ultraMeasuredDistance();
-
-    if(distance < 15) //if car in front is too close
-    {
-      move.stopDriving(); // stop driving
-      if (debug) Serial.print("wait for car in front of me");
-      delay(500);  // wait for 500 ms
-    }
-
-    if(left_avg>700) // if there's a line on the left side
-    {
-      move.moveStraight(8, 'b', 8);
-      if (debug) Serial.println("line on left side, turn a bit left");
-      move.turn(40,'r',3); // turn a bit to the left
-    }
-    else if(right_avg>700) // if there's a line on the right side
-    {
-      move.moveStraight(8, 'b', 8);
-      if (debug) Serial.println("line on left side, turn a bit right");
-      move.turn(20,'l',3); // turn a bit to the right
-    }
-  }
-}
-
 void turnHead(int angle, char dir){ 
   if (angle>35)
   {
@@ -222,4 +193,79 @@ void turnHead(int angle, char dir){
       break;
     }
   }
+  delay(10); //give time for head to turn;
 }
+
+bool sweepHeadTime(int delta_time)
+{
+  long cur_time = millis();
+  if (cur_time - last_time > delta_time)
+  {
+    last_time = cur_time;
+    return true;
+  }
+  else
+  {
+    return false;
+  }
+}
+
+char checkForProblems()
+{
+  int problem = 'N';
+  int left_avg = findLeftIRAvg();
+  int right_avg = findRightIRAvg();
+  long distance = ultraMeasuredDistance();
+
+  if(left_avg>700) // if there's a line on the left side
+  {
+    problem = 'L';
+  }
+  else if(right_avg>700) // if there's a line on the right side
+  {
+    problem = 'R';
+  }
+  else if(distance < 15)
+  {
+    problem = 'O';
+  }
+
+  return problem;
+}
+
+void sweepHead()
+{
+  if(sweepHeadTime(30))
+  {
+    head_pos += add_amount;
+    if (head_pos<55 || head_pos>135)
+    {
+      add_amount = -add_amount;
+    }
+    turnHeadPos(head_pos);
+  }
+
+}
+
+void computeAngle(int head_pos, int *angle, char *turn_dir){ 
+  // next part of code is used to convert the angle found by ultrasound sensor (0-180 degrees), where completely right is 0 and completely left is 180
+  // new angle: 0 is straight forward. Now an angle and a direction (left or right) has to be entered. angle between 0 and infinty degrees. turn direction 0 (left) or 1(right).
+  if(head_pos > 90){ // if largest distance is found on left side of robot
+    *turn_dir = 'l'; // robot should turn left
+    *angle = head_pos - 90; 
+  }
+  else if(head_pos < 90){ // if largest distance is found on right side of robot
+    *turn_dir = 'r'; // robot should turn right
+    *angle = 90 - head_pos; 
+  }
+}
+
+void turnHeadPos(int head_pos)
+{
+  int angle;
+  char turn_dir;
+  computeAngle(head_pos, &angle, &turn_dir);
+  turnHead(angle,turn_dir);
+}
+
+
