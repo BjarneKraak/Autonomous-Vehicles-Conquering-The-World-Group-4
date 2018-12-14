@@ -102,6 +102,7 @@ void loop()
   }
   
   char problem = checkForProblems();
+  problem = 'N';// Manual deleting the ultrasound
   if (problem != 'N') //if there's a problem
   {
     if (debug) Serial.println("A problem occured");
@@ -267,5 +268,3 @@ void turnHeadPos(int head_pos)
   computeAngle(head_pos, &angle, &turn_dir);
   turnHead(angle,turn_dir);
 }
-
-
