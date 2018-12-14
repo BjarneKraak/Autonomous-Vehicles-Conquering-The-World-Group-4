@@ -99,6 +99,34 @@ void loop()
       move.stopDriving();
       break;
     }
+    case 't':
+    {
+      turnHead(0, 'l');
+      move.stopDriving();
+      int turn_dir;
+      while (Serial.available()>0) 
+      {
+        turn_dir = Serial.read();
+      }
+      switch (turn_dir)
+      {
+        case 'l':
+        {
+          move.turn(30, 'l');
+          move.moveStraight(15, 'f');
+          delay(4000);
+          break;
+        }
+        case 'r':
+        {
+          move.turn(30, 'r');
+          move.moveStraight(15, 'f');
+          delay(4000);
+          break;
+        }
+      }
+      data = '0'; //reset data
+    }
   }
   
   char problem = checkForProblems();
@@ -106,12 +134,12 @@ void loop()
   {
     if (debug) Serial.println("A problem occured");
     move.stopDriving();
-    Serial.println(problem);
-    while(problem!='N')
-    {
-      problem = checkForProblems();            
-      delay(200);
-    }
+    actToProblem(problem);
+    data = '0';
+       while (Serial.available()>0) 
+      {
+        int crap = Serial.read();
+      }
   } 
 }
 
@@ -210,29 +238,6 @@ bool sweepHeadTime(int delta_time)
   }
 }
 
-char checkForProblems()
-{
-  int problem = 'N';
-  int left_avg = findLeftIRAvg();
-  int right_avg = findRightIRAvg();
-  long distance = ultraMeasuredDistance();
-
-  if(left_avg>700) // if there's a line on the left side
-  {
-    problem = 'L';
-  }
-  else if(right_avg>700) // if there's a line on the right side
-  {
-    problem = 'R';
-  }
-  else if(distance < 15)
-  {
-    problem = 'O';
-  }
-
-  return problem;
-}
-
 void sweepHead()
 {
   if(sweepHeadTime(30))
@@ -267,5 +272,133 @@ void turnHeadPos(int head_pos)
   computeAngle(head_pos, &angle, &turn_dir);
   turnHead(angle,turn_dir);
 }
+
+char checkForProblems()
+{
+  int problem = 'N';
+  int left_avg = findLeftIRAvg();
+  int right_avg = findRightIRAvg();
+  long distance = ultraMeasuredDistance();
+
+  if(left_avg>700) // if there's a line on the left side
+  {
+    problem = 'L';
+  }
+  else if(right_avg>700) // if there's a line on the right side
+  {
+    problem = 'R';
+  }
+  else if(distance < 15)
+  {
+    problem = 'O';
+  }
+
+  return problem;
+}
+
+int findBestPos(){ 
+  int pos = 0;    // variable to store the servo position
+  int begin_pos = 45; // startposition for the servo connected to the ultrasound sensor
+  int end_pos = 135; // endposition for the servo connected to the ultrasound sensor 
+  int delta_pos = 4; // the size of the step in changing the position of the servo connected to the ultrasound sensor 
+  int delay_time = 20; // time it waits between changing positions
+  int larg_dist = 0; // keep track of the largest distance that is found
+  int larg_pos;
+  int smal_dist = 500; // keep track of the smallest distance that is found
+  long distance; //keep track of distance that it takes to reflect a signal
+
+  USServo.write(begin_pos); // move head in begin position
+  delay(100); // delay for stability
+  for (pos = begin_pos; pos <= end_pos; pos += delta_pos)
+  { // turn the head in the given range
+    USServo.write(pos); // tell servo to go to position in variable 'pos'
+    delay(delay_time); // delay for delay_time
+    distance = ultraMeasuredDistance(); // find the distance to the wall or object in front of the sensor
+    if (distance > larg_dist)
+    { // if the current distance is larger then the largestDistance that is found until now
+      larg_dist = distance; // change the larg_dist into the currentdistance (which is the largest distance that is found until now)
+      larg_pos = pos; // save the position at which the larg_dist occurs
+    }
+  }
+  return larg_pos;
+}
+
+void actToProblem(char problem)
+{
+  switch (problem)
+  {
+    case 'L':
+    {
+      move.moveStraight(8, 'b');
+      move.turn(40, 'r', 8);
+      move.driveInf('f', 3);
+      long cur_time = millis();
+      while(millis() - cur_time < 1500)
+      {
+          char problem = checkForProblems();
+          if (problem != 'N') //if there's a problem
+          {
+            if (debug) Serial.println("A problem occured");
+            move.stopDriving();
+            move.moveStraight(8, 'b');
+          }
+      }
+      move.stopDriving();
+      
+      break;
+    }
+    case 'R':
+    {
+      move.moveStraight(8, 'b');
+      move.turn(40, 'l', 8);
+      move.driveInf('f', 3);
+      long cur_time = millis();
+      while(millis() - cur_time < 1500)
+      {
+          char problem = checkForProblems();
+          if (problem != 'N') //if there's a problem
+          {
+            if (debug) Serial.println("A problem occured");
+            move.stopDriving();
+            move.moveStraight(8, 'b');
+          }
+      }
+      move.stopDriving();
+      break;
+    }
+    case 'O':
+    {
+      move.moveStraight(8, 'b');
+      int best_pos = findBestPos();
+      if (best_pos<90)
+      {
+        best_pos = 30;
+      }
+      else
+      {
+        best_pos = 150;
+      }
+      int angle;
+      char turn_dir;
+      computeAngle(best_pos, &angle, &turn_dir);
+      move.turn(angle,turn_dir);
+      move.driveInf('f', 3);
+      long cur_time = millis();
+      while(millis() - cur_time < 1500)
+      {
+          char problem = checkForProblems();
+          if (problem != 'N') //if there's a problem
+          {
+            if (debug) Serial.println("A problem occured");
+            move.stopDriving();
+            move.moveStraight(8, 'b');
+          }
+      }
+      move.stopDriving();
+      break;
+    }
+  }
+}
+
 
 
