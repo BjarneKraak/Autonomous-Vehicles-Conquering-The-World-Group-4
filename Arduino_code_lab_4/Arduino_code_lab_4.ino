@@ -5,24 +5,24 @@
 #define DISTANCE 9 // servo pin for ultrasonic sensor
 
 //include code for turning ultrasonic sensor
-#include <Servo.h> 
-Servo USServo;        // Create Servo object to control the servo 
+#include <Servo.h>
+Servo USServo;        // Create Servo object to control the servo
 
 //information for initializing zigbee module:
     // configure the next line with a unique ID number for every robot!
     #define SELF     1
-    
+
     // Define the pan (personal area network) number
     // It must be unique for every team and the same for all robots in one team!
     // For team number N use: "A00N"
     #define PAN_ID           "A004"
-    
+
     // define a channel ID to use for communication
     // It must be the same for all robots in one team!
     // It is represented by a 2-digit hexadecimal number between 0B and 1F.
     #define CHANNEL_ID       "D"
-    
-    
+
+
     // some macros needed for the xbee_init function. Do not touch :-).
     #define STRING(name) #name
     #define TOSTRING(x) STRING(x)
@@ -51,7 +51,7 @@ void setup()
   xbee_init();
   Serial.println("This is the lab_4 algorithm");
   USServo.attach(ULTRASONIC_SERVO);  // Servo is connected to digital pin 11
-  
+
   int angle;
   char turn_dir;
   computeAngle(head_pos, &angle, &turn_dir);
@@ -60,7 +60,7 @@ void setup()
 
 void loop()
 {
-  while (Serial.available()>0) 
+  while (Serial.available()>0)
   {
     data = Serial.read();
   }
@@ -99,21 +99,48 @@ void loop()
       move.stopDriving();
       break;
     }
+    case 't':
+    {
+      turnHead(0, 'l');
+      move.stopDriving();
+      int turn_dir;
+      while (Serial.available()>0)
+      {
+        turn_dir = Serial.read();
+      }
+      switch (turn_dir)
+      {
+        case 'l':
+        {
+          move.turn(30, 'l');
+          move.moveStraight(15, 'f');
+          delay(4000);
+          break;
+        }
+        case 'r':
+        {
+          move.turn(30, 'r');
+          move.moveStraight(15, 'f');
+          delay(4000);
+          break;
+        }
+      }
+      data = '0'; //reset data
+    }
   }
-  
+
   char problem = checkForProblems();
-  problem = 'N';// Manual deleting the ultrasound
   if (problem != 'N') //if there's a problem
   {
     if (debug) Serial.println("A problem occured");
     move.stopDriving();
-    Serial.println(problem);
-    while(problem!='N')
+    actToProblem(problem);
+    data = '0';
+    while (Serial.available()>0)
     {
-      problem = checkForProblems();            
-      delay(200);
+      int crap = Serial.read();
     }
-  } 
+  }
 }
 
 int findLeftIRAvg() //calculate the average of 10 readings
@@ -166,7 +193,7 @@ void xbee_init(void)
   Serial.print("ATCN\r");                     // exit command mode and return to transparent mode, communicate all data on the serial link onto the wireless network
 }
 
-void turnHead(int angle, char dir){ 
+void turnHead(int angle, char dir){
   if (angle>35)
   {
     angle = 35;
@@ -211,29 +238,6 @@ bool sweepHeadTime(int delta_time)
   }
 }
 
-char checkForProblems()
-{
-  int problem = 'N';
-  int left_avg = findLeftIRAvg();
-  int right_avg = findRightIRAvg();
-  long distance = ultraMeasuredDistance();
-
-  if(left_avg>700) // if there's a line on the left side
-  {
-    problem = 'L';
-  }
-  else if(right_avg>700) // if there's a line on the right side
-  {
-    problem = 'R';
-  }
-  else if(distance < 15)
-  {
-    problem = 'O';
-  }
-
-  return problem;
-}
-
 void sweepHead()
 {
   if(sweepHeadTime(30))
@@ -248,16 +252,16 @@ void sweepHead()
 
 }
 
-void computeAngle(int head_pos, int *angle, char *turn_dir){ 
+void computeAngle(int head_pos, int *angle, char *turn_dir){
   // next part of code is used to convert the angle found by ultrasound sensor (0-180 degrees), where completely right is 0 and completely left is 180
   // new angle: 0 is straight forward. Now an angle and a direction (left or right) has to be entered. angle between 0 and infinty degrees. turn direction 0 (left) or 1(right).
   if(head_pos > 90){ // if largest distance is found on left side of robot
     *turn_dir = 'l'; // robot should turn left
-    *angle = head_pos - 90; 
+    *angle = head_pos - 90;
   }
   else if(head_pos < 90){ // if largest distance is found on right side of robot
     *turn_dir = 'r'; // robot should turn right
-    *angle = 90 - head_pos; 
+    *angle = 90 - head_pos;
   }
 }
 
