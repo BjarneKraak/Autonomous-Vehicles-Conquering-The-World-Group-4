@@ -136,10 +136,10 @@ void loop()
     move.stopDriving();
     actToProblem(problem);
     data = '0';
-       while (Serial.available()>0) 
-      {
-        int crap = Serial.read();
-      }
+    while (Serial.available()>0) 
+    {
+      int crap = Serial.read();
+    }
   } 
 }
 
