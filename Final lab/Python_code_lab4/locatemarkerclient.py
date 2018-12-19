@@ -9,6 +9,14 @@ from time import sleep
 from marker import Marker, MarkerCollection, MARKER_REGEX
 from zigbee import Zigbee
 
+#Create global vars
+ORIGIN = 0
+ROBOTA = 0
+OB1 = 0
+OB2 = 0
+OB3 = 0
+FINISH = 0
+
 # forget markers after not seeing them for 10 seconds
 MARKER_TIMEOUT = 0.5
 
@@ -40,9 +48,51 @@ ZIGBEE = Zigbee('COM12', 9600)
 
 # DATA holds the unprocessed data from the connection. Its length will be limited to BUFFER_SIZE
 BUFFER_SIZE = 1024
-DATA = b""
+DATA = b"" #also global
 
 ## FUNCTIONS
+
+def updatemarker():
+    # check the data against the marker regular expression to check if there is complete marker information in the received data
+    global DATA
+    MARKER_RE_MATCH = re.search(MARKER_REGEX, DATA)
+
+    # as long as we still have more complete marker information...
+    while MARKER_RE_MATCH != None:
+        # find the first marker information from the received data
+        MARKER = Marker(MARKER_RE_MATCH.group())
+        # show that we have found something
+        #print("Found marker {0}.".format(MARKER.number))
+        # update information in the marker collection
+        MARKERS.update_marker(MARKER)
+        # remove outdated observations
+        MARKERS.clean_outdated_markers(MARKER_TIMEOUT)
+        # remove the processed data from the buffer
+        DATA = DATA[MARKER_RE_MATCH.end():]
+        # look for the next marker in the buffer
+        MARKER_RE_MATCH = re.search(MARKER_REGEX, DATA)
+
+        # send something arbitrary to the Zigbee dongle. This has no real function except to demonstrate how to send something.
+        #ZIGBEE.write(b'Hello')
+
+    if len(DATA) > BUFFER_SIZE:
+        # something is going wrong, flush garbage data
+        DATA = ""
+    # indicate that the markers are global
+    global ORIGIN
+    global ROBOTA
+    global OB1
+    global OB2
+    global OB3
+    global FINISH
+
+    # find all markers
+    ORIGIN = MARKERS.get_marker('origin')
+    ROBOTA = MARKERS.get_marker('robotA')
+    OB1 = MARKERS.get_marker('ob1')
+    OB2 = MARKERS.get_marker('ob2')
+    OB3 = MARKERS.get_marker('ob3')
+    FINISH = MARKERS.get_marker('finish')
 
 def distancetoorigin(name):
     if(not ORIGIN is None) and (not name is None):
@@ -117,40 +167,7 @@ while (arrived == False):
         continue
 
 
-    # check the data against the marker regular expression to check if there is complete marker information in the received data
-    MARKER_RE_MATCH = re.search(MARKER_REGEX, DATA)
-
-    # as long as we still have more complete marker information...
-    while MARKER_RE_MATCH != None:
-        # find the first marker information from the received data
-        MARKER = Marker(MARKER_RE_MATCH.group())
-        # show that we have found something
-        #print("Found marker {0}.".format(MARKER.number))
-        # update information in the marker collection
-        MARKERS.update_marker(MARKER)
-        # remove outdated observations
-        MARKERS.clean_outdated_markers(MARKER_TIMEOUT)
-        # remove the processed data from the buffer
-        DATA = DATA[MARKER_RE_MATCH.end():]
-        # look for the next marker in the buffer
-        MARKER_RE_MATCH = re.search(MARKER_REGEX, DATA)
-
-        # send something arbitrary to the Zigbee dongle. This has no real function except to demonstrate how to send something.
-        ##ZIGBEE.write(b'Hello')
-
-
-    if len(DATA) > BUFFER_SIZE:
-        # something is going wrong, flush garbage data
-        DATA = ""
-
-    # use the results to get the position and orientation of one marker (robot) relative to another marker (origin)
-
-    ORIGIN = MARKERS.get_marker('origin')
-    ROBOTA = MARKERS.get_marker('robotA')
-    OB1 = MARKERS.get_marker('ob1')
-    OB2 = MARKERS.get_marker('ob2')
-    OB3 = MARKERS.get_marker('ob3')
-    FINISH = MARKERS.get_marker('finish')
+    updatemarker()
 
     # Define empty vectors
     difference_vector = [None] * 3
@@ -251,9 +268,19 @@ while (arrived == False):
                     if (angle_difference_vector - AO_robotA < 0):
                         while (angle_difference_vector - AO_robotA < 0):
                             ZIGBEE.write(b'r')
+                            updatemarker()
+                            print(angle_difference_vector)
+                            print(AO_robotA)
+                            angle_difference_vector = alignment_angle()
+                            AO_robotA = relativeangle(ROBOTA, ORIGIN)
                     elif (angle_difference_vector - AO_robotA > 0):
                         while (angle_difference_vector - AO_robotA > 0):
-                        ZIGBEE.write(b'l')
+                            ZIGBEE.write(b'l')
+                            updatemarker()
+                            print(angle_difference_vector)
+                            print(AO_robotA)
+                            angle_difference_vector = alignment_angle()
+                            AO_robotA = relativeangle(ROBOTA, ORIGIN)
                     ZIGBEE.write(b's')
 
                 elif (distance_difference_vector > 12):
