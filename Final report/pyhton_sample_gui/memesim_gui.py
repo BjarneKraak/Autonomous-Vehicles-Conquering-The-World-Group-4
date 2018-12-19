@@ -17,7 +17,7 @@ from lib.gui.memesimgui import MemeSimGUI
 MEMESIM_IP_ADDR = "131.155.124.132"
 
 # set the team number here
-TEAM_NUMBER = 3
+TEAM_NUMBER = 4
 
 # create a MemeSimClient object that takes car of all TCP communication with the simulator
 MEMESIM_CLIENT = MemeSimClient(MEMESIM_IP_ADDR, TEAM_NUMBER)
