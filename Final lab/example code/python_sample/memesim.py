@@ -6,7 +6,15 @@ from lib.memesimcommand import MemeSimCommand
 from lib.memesimresponse import MemeSimResponse
 from lib.memesimclient import MemeSimClient
 
+from lib.zigbee import Zigbee
+
 # Global variables/constants that can be accessed from all functions should be defined below
+
+
+# Create a Zigbee object for communication with the Zigbee dongle
+# Make sure to set the correct COM port and baud rate!
+# You can find the com port and baud rate in the xctu program.
+ZIGBEE = Zigbee('COM12', 9600)
 
 # set the simulator IP address
 MEMESIM_IP_ADDR = "131.155.124.132"
@@ -19,7 +27,6 @@ MEMESIM_CLIENT = MemeSimClient(MEMESIM_IP_ADDR, TEAM_NUMBER)
 
 # dictionary to hold a collection of memes
 MY_MEMES = dict()
-
 
 # the setup function is called once at startup
 # you can put initialization code here
@@ -35,6 +42,7 @@ def setup():
     # connect to the simulator
     MEMESIM_CLIENT.connect()
 
+    ZIGBEE.write(b'The program has started')
 
 # the process_response function is called when a response is received from the simulator
 def process_response(resp):
