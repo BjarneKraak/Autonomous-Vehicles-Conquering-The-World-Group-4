@@ -52,7 +52,7 @@ def distancetoorigin(name):
 
 def angletoorigin(name):
     if(not ORIGIN is None) and (not name is None):
-        coordinates = name.relative_position(ORIGIN)    
+        coordinates = name.relative_position(ORIGIN)
         angle = math.atan2(coordinates[1], coordinates[0]) * 180 / math.pi
         return angle
 
@@ -66,7 +66,7 @@ def alignment_distance( ):
         C_finish = FINISH.relative_position(ORIGIN)
         difference_vector[0] = C_finish[0] - C_robotA[0]
         difference_vector[1] = C_finish[1] - C_robotA[1]
-        
+
         distance_difference_vector = math.sqrt(math.pow(difference_vector[0],2) + math.pow(difference_vector[1],2))
         return distance_difference_vector
         print('Distance of difference vector is', distance_difference_vector)
@@ -74,11 +74,11 @@ def alignment_distance( ):
         print()
 
 def alignment_angle( ):
-        C_robotA = ROBOTA.relative_position(ORIGIN) 
+        C_robotA = ROBOTA.relative_position(ORIGIN)
         C_finish = FINISH.relative_position(ORIGIN)
         difference_vector[0] = C_finish[0] - C_robotA[0]
         difference_vector[1] = C_finish[1] - C_robotA[1]
-        
+
         angle_difference_vector = math.atan2(difference_vector[1], difference_vector[0]) * 180 / math.pi
         return angle_difference_vector
         print('Angle of difference vector is', angle_difference_vector)
@@ -92,15 +92,15 @@ def distance_object(obj):
         difference_vector[1] = C_object[1] - C_robotA[1]
         distance_difference_vector = math.sqrt(math.pow(difference_vector[0],2) + math.pow(difference_vector[1],2))
         return distance_difference_vector
- 
+
 def slope_object(obj):
         C_robotA = ROBOTA.relative_position(ORIGIN)
         C_object = obj.relative_position(ORIGIN)
         slope = (C_object[1] - C_robotA[1])/ (C_object[0] - C_robotA[0])
         perpendicular_slope = - slope
         return perpendicular_slope
-    
-    
+
+
 arrived = False
 temp = None
 first_iteration = False
@@ -116,7 +116,7 @@ while (arrived == False):
         # try again
         continue
 
-       
+
     # check the data against the marker regular expression to check if there is complete marker information in the received data
     MARKER_RE_MATCH = re.search(MARKER_REGEX, DATA)
 
@@ -138,7 +138,7 @@ while (arrived == False):
         # send something arbitrary to the Zigbee dongle. This has no real function except to demonstrate how to send something.
         ##ZIGBEE.write(b'Hello')
 
-     
+
     if len(DATA) > BUFFER_SIZE:
         # something is going wrong, flush garbage data
         DATA = ""
@@ -156,24 +156,24 @@ while (arrived == False):
     difference_vector = [None] * 3
     right_coordinates = [None] * 3
     left_coordinates = [None] * 3
-    
+
     if (not ORIGIN is None) and (not FINISH is None):
         D_finish = distancetoorigin(FINISH)
         A_finish = angletoorigin(FINISH)
         AO_finish = relativeangle(FINISH, ORIGIN)
 
-        
+
     if (not ORIGIN is None) and (not ROBOTA is None):
         D_robotA = distancetoorigin(ROBOTA)
         A_robotA = angletoorigin(ROBOTA)
         AO_robotA = relativeangle(ROBOTA, ORIGIN)
 
-        
+
     if (not ORIGIN is None) and (not FINISH is None):
         if (temp == None):
             coordinates_finish = FINISH.relative_position(ORIGIN)
             temp = 1;
-    '''  
+    '''
     if (not ORIGIN is None) and (not ROBOTA is None) and (not FINISH is None):
         angle_difference_vector = alignment_angle()
         distance_difference_vector = alignment_distance()
@@ -183,7 +183,7 @@ while (arrived == False):
         if (abs(angle_difference_vector - AO_robotA) > 5):
             #while (abs(angle_difference_vector - AO_robotA) > 2):
                 #angle_difference_vector = alignment_angle()
-                
+
             if (angle_difference_vector - AO_robotA < 0):
                 ZIGBEE.write(b'r')
                 time.sleep(0.05)
@@ -202,19 +202,19 @@ while (arrived == False):
             ZIGBEE.write(b's')
             arrived = True
             print('Arrived at destination')
-                    
+
         '''
     if (not ORIGIN is None) and (not ROBOTA is None) and (not FINISH is None):
         '''
         if (not OB1 is None) and (distance_object(OB1) <= 45): #within safety margin around object
             C_robotA = ROBOTA.relative_position(ORIGIN)
             C_finish = FINISH.relative_position(ORIGIN)
-            
+
             print(distance_object(OB1))
-            
+
             slope = slope_object(OB1)
             b = C_robotA[1] + slope * C_robotA[0] # determine new b coordinate
-            dx1 = C_robotA[0] - (- b / slope) 
+            dx1 = C_robotA[0] - (- b / slope)
             beta = math.atan2(C_robotA[1] ,dx1) * 180 / math.pi
 
             dx = math.sin(beta) * 15
@@ -227,7 +227,7 @@ while (arrived == False):
 
             right_distance = math.sqrt(math.pow(C_finish[0] - right_coordinates[0],2) + math.pow(C_finish[1] - right_coordinates[1],2))
             left_distance = math.sqrt(math.pow(C_finish[0] - left_coordinates[0],2) + math.pow(C_finish[1] - left_coordinates[1],2))
-            
+
             if (right_distance < left_distance):
                 #ZIGBEE.write(b't') # send a t do tell the robot that has encountered an object
                 print('Right')
@@ -247,34 +247,25 @@ while (arrived == False):
                 print('Distance between RobotA and finish is ', distance_difference_vector)
                 if (abs(angle_difference_vector - AO_robotA) > 8):
                     #while (abs(angle_difference_vector - AO_robotA) > 2):
-                    #angle_difference_vector = alignment_angle()    
+                    #angle_difference_vector = alignment_angle()
                     if (angle_difference_vector - AO_robotA < 0):
-                        ZIGBEE.write(b'r')
-                        time.sleep(0.03)
-                        ZIGBEE.write(b's')
-                        time.sleep(0.3)
+                        while (angle_difference_vector - AO_robotA < 0):
+                            ZIGBEE.write(b'r')
                     elif (angle_difference_vector - AO_robotA > 0):
+                        while (angle_difference_vector - AO_robotA > 0):
                         ZIGBEE.write(b'l')
-                        time.sleep(0.03)
-                        ZIGBEE.write(b's')
-                        time.sleep(0.3)
+                    ZIGBEE.write(b's')
 
                 elif (distance_difference_vector > 12):
                     ZIGBEE.write(b'f')
                     time.sleep(0.05)
-            
+
             elif (not ORIGIN is None) and (not ROBOTA is None) and (FINISH is None) and (first_iteration == True):
                 ZIGBEE.write(b'f')
                 time.sleep(2)
                 ZIGBEE.write(b's')
                 arrived = True
-                print('Arrived at destination')               
-            
+                print('Arrived at destination')
+
 # close the socket (if we ever get here)
 LMSOCKET.close()
-
-
-
-
-
-
