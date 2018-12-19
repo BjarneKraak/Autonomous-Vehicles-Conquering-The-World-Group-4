@@ -36,7 +36,7 @@ LMSOCKET.setblocking(0)
 # Create a Zigbee object for communication with the Zigbee dongle
 # Make sure to set the correct COM port and baud rate!
 # You can find the com port and baud rate in the xctu program.
-ZIGBEE = Zigbee('COM13', 9600)
+ZIGBEE = Zigbee('COM12', 9600)
 
 # DATA holds the unprocessed data from the connection. Its length will be limited to BUFFER_SIZE
 BUFFER_SIZE = 1024
