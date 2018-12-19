@@ -43,4 +43,3 @@ class Zigbee(object):
             self._output_buffer = b''
             # read data in input buffer
             self._input_buffer += self.serial.read_all()
-

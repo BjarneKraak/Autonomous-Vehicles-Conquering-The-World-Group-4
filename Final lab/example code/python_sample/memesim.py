@@ -53,13 +53,24 @@ def process_response(resp):
             ypos = float(resp.cmdargs()[3])
             angle = float(resp.cmdargs()[4])
     print("Received response: " + str(resp))
+    ZIGBEE.write(b'The program has started')
 
+    data = readZIGBEE()
+    if len(data) is not 0:
+        print(data)
+#FUNCTIONS:_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#
 # this function is called over and over again
 def loop():
     # do something arbitray with the memes
     RQ1 = MemeSimCommand.RQ(1, 1)
     MEMESIM_CLIENT.send_command(RQ1)
 
+#NEXT_FUNCTION:
+def readZIGBEE():
+    data = str(ZIGBEE.read()) #read data as non string (dunno what it is) and convert to string
+    data = data[2:len(data)-1] # delete begin b' and '
+    return data #return
+#END_OF_FUNCTIONS_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#
 # call the setup function for initialization
 setup()
 
