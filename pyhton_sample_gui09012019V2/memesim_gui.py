@@ -18,6 +18,7 @@ MEMESIM_IP_ADDR = "131.155.124.132"
 
 # set the team number here
 TEAM_NUMBER = 4
+i =0
 
 # create a MemeSimClient object that takes car of all TCP communication with the simulator
 MEMESIM_CLIENT = MemeSimClient(MEMESIM_IP_ADDR, TEAM_NUMBER)
@@ -72,20 +73,23 @@ def process_response(resp):
             # extract the data from the request
             balance = int(resp.cmdargs()[1])
             MEMESIM_GUI.show_balance(balance)
-
+      
 
 def loop():
     '''This function is called over and over again.'''
 
+    global i
     # do something arbitray. To be adapted.
-
+    
     # create a list robot queries, one for each of the robots
-    RQS = [MemeSimCommand.RQ(TEAM_NUMBER, (TEAM_NUMBER-1)*3+r) for r in range(1, 4)]
+    RQS = [MemeSimCommand.RQ(TEAM_NUMBER, (TEAM_NUMBER-1)*3+r) for r in range(1, 2)]
 
     # add a request to check the account balance
     RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
-    #RQS.append(MemeSimCommand.RS(150,150,20))
+    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,150+i,150,20))
+    i=i+1
     # send the requests to the simulator
+    
     for req in RQS:
         MEMESIM_CLIENT.send_command(req)
     
@@ -110,7 +114,7 @@ while not MEMESIM_GUI.is_closing:
     # process the new responses
     for r in RESPONSES:
         process_response(r)
-
+    
     # call the loop function
     loop()
 

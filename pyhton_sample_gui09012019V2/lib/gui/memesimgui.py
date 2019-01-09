@@ -72,43 +72,6 @@ class MemeSimGUI():
         self._memebtn = tk.Button(self._frame, text="Reset Money", command= self._clicked)
         self._memebtn.pack(fill=tk.X, padx=(x1r,x1l), pady=10)
 
-
-        '''
-         # a simple button to click
-        #self._memebtn = tk.Button(self._frame, text="Request query", command= self._clicked)
-        #self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-        # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Market query", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-        # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Interview person", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-        # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Process interview", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-          # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Test meme", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-          # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Prepare campaign", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-          # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Launch campaign", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-
-          # a simple button to click
-        self._memebtn = tk.Button(self._frame, text="Reset Money", command= self._clicked)
-        self._memebtn.pack(fill=tk.X, padx=(x2r,x2l), pady=10)
-        '''
-
-        
-
         # a button to close the GUI
         self._closebtn = tk.Button(self._frame, text="Close", command=self.close)
         self._closebtn.pack(fill=tk.X, padx=(x1r,x1l), pady=10)
