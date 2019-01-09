@@ -13,6 +13,36 @@ x_pos = [None] * 3
 y_pos = [None] * 3
 angle = [None] * 3
 
+destination = "C1"
+
+#Location of all cities and lab
+#Contintent 1:
+C1 = [2550, 250]
+C2 = [3250, 250]
+C3 = [3250, 950]
+C4 = [2550, 1250]
+
+#continent 2:
+C5 = [3250, 2550]
+C6 = [3250, 3250]
+C7 = [2550, 3250]
+C8 = [2250, 2250]
+
+#continent 3:
+C9 = [950, 3250]
+C10 = [250, 3250]
+C11 = [250, 2250]
+C12 = [1250, 2250]
+
+#lab (4):
+LAB = [175, 1025]
+
+#middle of continents
+M1 = [1750, 875]
+M2 = [4375, 4375]
+M3 = [875, 1750]
+MLAB = [875, 875]
+
 # Create a Zigbee object for communication with the Zigbee dongle
 # Make sure to set the correct COM port and baud rate!
 # You can find the com port and baud rate in the xctu program.
@@ -48,37 +78,37 @@ def setup():
 
 # the process_response function is called when a response is received from the simulator
 def process_response(resp):
+    global x_pos
+    global y_pos
+    global angle
     if resp.cmdtype() == 'rq':
         if not resp.iserror():
             robot_id = int(resp.cmdargs()[1])
-            print(robot_id)
             #save positions of robot
-            x_pos[robot_id-10] = float(resp.cmdargs()[2])
-            y_pos[robot_id-10] = float(resp.cmdargs()[3])
-            angle[robot_id-10] = float(resp.cmdargs()[4])
-    print("Received response: " + str(resp))
+            x_pos[robot_id - 10] = float(resp.cmdargs()[2])
+            y_pos[robot_id - 10] = float(resp.cmdargs()[3])
+            angle[robot_id - 10] = float(resp.cmdargs()[4])
+
+    #print("Received response: " + str(resp))
     ZIGBEE.write(b'The program has started')
 
     data = readZIGBEE()
     if len(data) is not 0:
         print(data)
+
 #FUNCTIONS:_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#
-# this function is called over and over again
-def loop():
-    # do something arbitray with the memes
-    RQ1 = MemeSimCommand.RQ(4, 10)
-    MEMESIM_CLIENT.send_command(RQ1)
 
 #NEXT_FUNCTION:
-def readZIGBEE():
-    data = str(ZIGBEE.read()) #read data as non string (dunno what it is) and convert to string
-    data = data[2:len(data)-1] # delete begin b' and '
-    return data #return
-#END_OF_FUNCTIONS_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#
-# call the setup function for initialization
-setup()
+def navigate_to(x_goal, y_goal):
+    RQ1 = MemeSimCommand.RQ(4, 10)
+    MEMESIM_CLIENT.send_command(RQ1)
+    sleep(1.0)
+    update_responses()
+    #continent = find_continent()
+    read_pos(10)
 
-while True:
+#update responses
+def update_responses():
     # get new responses
     RESPONSES = MEMESIM_CLIENT.new_responses()
 
@@ -86,8 +116,40 @@ while True:
     for r in RESPONSES:
         process_response(r)
 
-    # call the loop function
-    loop()
+#find current continents
+def find_continent():
+    continent = None
+    if x_pos<1450 and y_pos<1450:
+        continent = "LAB"
+    if x_pos>2100 and y_pos<1450:
+        continent = "CON1"
+    if x_pos<1450 and y_pos<1450:
+        continent = "CON2"
+    if x_pos<1450 and y_pos<1450:
+        continent = "CON3"
+    return continent
 
-    # slow the loop down
-    sleep(2.0)
+#read zigbee module
+def readZIGBEE():
+    data = str(ZIGBEE.read()) #read data as non string (dunno what it is) and convert to string
+    data = data[2:len(data)-1] # delete begin b' and '
+    return data #return
+
+#Next function
+
+def read_pos(robot_id):
+
+    global x_pos
+    global y_pos
+    global angle
+
+    print( x_pos[robot_id - 10] )
+    print( y_pos[robot_id - 10] )
+    print( angle[robot_id - 10] )
+#END_OF_FUNCTIONS_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#
+# call the setup function for initialization
+setup()
+
+while True:
+    if (destination == 'C1'):
+        navigate_to(C1[0], C1[1])
