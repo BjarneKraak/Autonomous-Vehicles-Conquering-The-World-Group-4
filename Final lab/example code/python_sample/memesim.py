@@ -15,6 +15,7 @@ x_pos = [None] * 3
 y_pos = [None] * 3
 angle = [None] * 3
 
+#suggestion: make different destination for every robot so a array with 3 variables
 destination = "C1"
 
 #Location of all cities and lab
