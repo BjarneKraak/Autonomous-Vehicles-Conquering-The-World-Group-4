@@ -1,3 +1,5 @@
+import math
+
 from time import sleep
 
 # import code that is used
@@ -99,13 +101,19 @@ def process_response(resp):
 #FUNCTIONS:_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#_#
 
 #NEXT_FUNCTION:
-def navigate_to(x_goal, y_goal):
-    RQ1 = MemeSimCommand.RQ(4, 10)
-    MEMESIM_CLIENT.send_command(RQ1)
-    sleep(1.0)
-    update_responses()
-    #continent = find_continent()
-    read_pos(10)
+def navigate_to(destination, robot_id):
+    update_position(robot_id)
+
+    continent = find_continent(robot_id)
+    if (continent == 'CON1'):
+        drive_to(M1[0],M1[1], robot_id)
+    if (continent == 'CON2'):
+        drive_to(M2[0],M2[1], robot_id)
+    if (continent == 'CON3'):
+        drive_to(M3[0],M3[1], robot_id)
+    if (continent == 'LAB'):
+        drive_to(LAB[0],LAB[1], robot_id)
+    #read_pos(10)
 
 #update responses
 def update_responses():
@@ -117,28 +125,70 @@ def update_responses():
         process_response(r)
 
 #find current continents
-def find_continent():
+def find_continent(robot_id):
     continent = None
-    if x_pos<1450 and y_pos<1450:
+    if x_pos[robot_id - 10]<1450 and y_pos[robot_id - 10]<1450:
         continent = "LAB"
-    if x_pos>2100 and y_pos<1450:
+    if x_pos[robot_id - 10]>2100 and y_pos[robot_id - 10]<1450:
         continent = "CON1"
-    if x_pos<1450 and y_pos<1450:
+    if x_pos[robot_id - 10]>2100 and y_pos[robot_id - 10]>2100:
         continent = "CON2"
-    if x_pos<1450 and y_pos<1450:
+    if x_pos[robot_id - 10]<1450 and y_pos[robot_id - 10]>2100:
         continent = "CON3"
+    #print('continent = ', continent) #debug message
     return continent
 
-#read zigbee module
+def drive_to(x_goal, y_goal, robot_id):
+    #print("entered drive_to function") #debug message
+    update_position(robot_id)
+    angle_difference_vector = alignment_angle(x_goal, y_goal, robot_id)
+
+    if (abs(angle_difference_vector - angle[robot_id - 10]) > 8): # 8 is foutmarge
+        if (angle_difference_vector - angle[robot_id - 10] < 0):
+            while (angle_difference_vector - angle[robot_id - 10] < 0):
+                print('Angle of difference vector is', angle_difference_vector)
+                print('Angle of robot is', angle[robot_id - 10])
+                ZIGBEE.write(b'r') #send: turn to right
+                update_position(robot_id) #update position
+                print("turn to right")
+                sleep(0.3) #wait for stability
+
+        elif (angle_difference_vector - angle[robot_id - 10] > 0):
+            while (angle_difference_vector - angle[robot_id - 10] > 0):
+                print('Angle of difference vector is', angle_difference_vector)
+                print('Angle of robot is', angle[robot_id - 10])
+                ZIGBEE.write(b'l') #send: turn to left
+                update_position(robot_id) #update position
+                print("turn to left")
+                sleep(0.3) #wait for stability
+
+        ZIGBEE.write(b's')
+        print("stop turning")
+
+#update position of robots: find x, y, and angle of robot
+def update_position(robot_id):
+    RQ1 = MemeSimCommand.RQ(4, robot_id) #make a request
+    MEMESIM_CLIENT.send_command(RQ1) #send request
+    sleep(1.0) #wait a bit
+    update_responses() #find answers to responses: to x, y and angle
+
+#find alginment angle of robot with goal
+def alignment_angle(x_goal, y_goal, robot_id):
+    difference_vector = [None] * 2
+    difference_vector[0] = x_goal - x_pos[robot_id - 10]
+    difference_vector[1] = y_goal - y_pos[robot_id - 10]
+
+    angle_difference_vector = math.atan2(difference_vector[1], difference_vector[0]) * 180 / math.pi
+    return angle_difference_vector
+
+#read info from zigbee module
 def readZIGBEE():
     data = str(ZIGBEE.read()) #read data as non string (dunno what it is) and convert to string
     data = data[2:len(data)-1] # delete begin b' and '
     return data #return
 
-#Next function
-
+#read position of robot
 def read_pos(robot_id):
-
     global x_pos
     global y_pos
     global angle
@@ -151,5 +201,9 @@ def read_pos(robot_id):
 setup()
 
 while True:
-    if (destination == 'C1'):
-        navigate_to(C1[0], C1[1])
+    if (destination == 'C1' or destination == 'C2' or destination == 'C3' or destination == 'C4'):
+        navigate_to(destination, 10)
+    if (destination == 'C5' or destination == 'C6' or destination == 'C7' or destination == 'C8'):
+        navigate_to(destination, 11)
+    if (destination == 'C9' or destination == 'C10' or destination == 'C11' or destination == 'C12'):
+        navigate_to(destination, 12)
