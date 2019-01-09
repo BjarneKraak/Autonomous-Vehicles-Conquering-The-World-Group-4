@@ -9,7 +9,9 @@ from lib.memesimclient import MemeSimClient
 from lib.zigbee import Zigbee
 
 # Global variables/constants that can be accessed from all functions should be defined below
-
+x_pos = [None] * 3
+y_pos = [None] * 3
+angle = [None] * 3
 
 # Create a Zigbee object for communication with the Zigbee dongle
 # Make sure to set the correct COM port and baud rate!
@@ -49,9 +51,11 @@ def process_response(resp):
     if resp.cmdtype() == 'rq':
         if not resp.iserror():
             robot_id = int(resp.cmdargs()[1])
-            xpos = float(resp.cmdargs()[2])
-            ypos = float(resp.cmdargs()[3])
-            angle = float(resp.cmdargs()[4])
+            print(robot_id)
+            #save positions of robot
+            x_pos[robot_id-10] = float(resp.cmdargs()[2])
+            y_pos[robot_id-10] = float(resp.cmdargs()[3])
+            angle[robot_id-10] = float(resp.cmdargs()[4])
     print("Received response: " + str(resp))
     ZIGBEE.write(b'The program has started')
 
@@ -62,7 +66,7 @@ def process_response(resp):
 # this function is called over and over again
 def loop():
     # do something arbitray with the memes
-    RQ1 = MemeSimCommand.RQ(1, 1)
+    RQ1 = MemeSimCommand.RQ(4, 10)
     MEMESIM_CLIENT.send_command(RQ1)
 
 #NEXT_FUNCTION:

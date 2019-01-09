@@ -14,7 +14,7 @@ class MemeSimResponse(object):
         match = MemeSimResponse.ResponseRegEx.search(responsestr)
         if match is None:
             raise Exception('There is no response in the data.')
-        
+
         lev1args = match.group(0).split('!')
 
         # get the command type and remove from the list
