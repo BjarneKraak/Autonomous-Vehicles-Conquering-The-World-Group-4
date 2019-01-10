@@ -90,7 +90,7 @@ def process_response(resp):
             #save positions of robot
             x_pos[robot_id - 10] = float(resp.cmdargs()[2])
             y_pos[robot_id - 10] = float(resp.cmdargs()[3])
-            angle[robot_id - 10] = float(resp.cmdargs()[4])
+            angle[robot_id - 10] = ( float(resp.cmdargs()[4]) / (2*math.pi) )*360 #find angle and convert radians to degrees
 
     #print("Received response: " + str(resp))
     ZIGBEE.write(b'The program has started')
