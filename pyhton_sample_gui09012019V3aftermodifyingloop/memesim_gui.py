@@ -18,6 +18,7 @@ MEMESIM_IP_ADDR = "131.155.124.132"
 
 # set the team number here
 TEAM_NUMBER = 4
+Robot=10
 i =0
 
 # create a MemeSimClient object that takes car of all TCP communication with the simulator
@@ -33,8 +34,7 @@ MEMESIM_GUI = MemeSimGUI(ROOT)
 
 
 '''
-def rq():
-    '''this function will be executed when the user clicks the button in the GUI'''
+def rq():    
     print("RQ.")
     loop('rq')
 
@@ -117,6 +117,7 @@ def process_response(resp):
             angle = float(resp.cmdargs()[4])
             # show the received data in the GUI window
             MEMESIM_GUI.show_location(robot_id, xpos, ypos, angle)
+
         elif resp.cmdtype() == 'ca':
             # extract the data from the request
             balance = int(resp.cmdargs()[1])
@@ -130,14 +131,29 @@ def loop(mode):
     # do something arbitray. To be adapted.
     if mode=='rq':
         # create a list robot queries, one for each of the robots
-        RQS = [MemeSimCommand.RQ(TEAM_NUMBER, (TEAM_NUMBER-1)*3+r) for r in range(1, 2)]
-    elif mode'':
+        RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
+    elif mode=='mq':
         # add a request to check the account balance
-        RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
-        RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,2500,150,20))
-        RQS.append(MemeSimCommand.DB(TEAM_NUMBER,'money'))
+        number=input("How many individuals?")
+        RQS=[MemeSimCommand.MQ(TEAM_NUMBER,Robot,number)]
+    elif mode=='ip':
+        ID=input("ID of the individual to interview")
+        RQS= [MemeSimCommand.IP(TEAM_NUMBER,Robot,ID)]
+    elif mode=='pi':
+        ID=input("ID of the individual to interview")
+        RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
+    elif mode=='tm':        
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,999,999)]
+    elif mode=='pc':
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',999)]
+    elif mode=='lc':
+        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
+    elif mode=='db':
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,2500,150,20))
+    RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
         #RQS.append(MemeSimCommand.MQ(4,10,20))
-        i=i+1
+        #i=i+1
         # send the requests to the simulator
     
     for req in RQS:

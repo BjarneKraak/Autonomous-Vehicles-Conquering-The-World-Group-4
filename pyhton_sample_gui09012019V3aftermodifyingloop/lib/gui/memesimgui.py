@@ -18,6 +18,22 @@ class MemeSimGUI():
         # create a 'Frame' to hold the GUI elements
         self._frame = tk.Frame(self._master)
 
+
+
+
+        # create the option to create smaller frames within the master frame (for meme part)
+        self.bottom_frame = tk.Frame(self._frame)
+        self.bottom_frame.pack(side=tk.BOTTOM, expand=tk.YES)
+
+        # create a smaller Frame within the master frame (for meme part)
+        self.meme_frame = tk.Frame(self.bottom_frame)
+        self.meme_frame.pack(side=tk.TOP, expand=tk.NO, fill=tk.Y, ipadx=5, ipady=5)
+
+
+        self.f1_frame = tk.Frame(self.meme_frame)
+        self.f1_frame.pack(side=tk.RIGHT, expand=tk.YES, fill=tk.Y)
+
+        
         # create the GUI elements
         
         # a text label with a meme genome
@@ -25,7 +41,8 @@ class MemeSimGUI():
         # 'pack' determines the layout in the window. Google 'tkinter pack' for more info...
         self._memelbl.pack(fill=tk.X, padx=10, pady=10)
 
-        
+
+
 
         # a multi-line text box
         self._robot_pos_txt = tk.Text(self._frame, height=5)
@@ -37,10 +54,38 @@ class MemeSimGUI():
         self._balance_lbl.pack(fill=tk.X, padx=10, pady=10)
 
         x1r=100
-        x1l=650
+        x1l=750
 
         x2r=650
         x2l=100
+        
+        #europa
+        
+        self.memebtn = tk.Button(self.f1_frame, text="Europe", fg = "red", bg = "black", command= self.dbC)
+        self.memebtn["width"] = 15
+        self.memebtn.pack(anchor=tk.N)
+
+         #europa
+        
+        self.memebtn = tk.Button(self.f1_frame, text="Afrikaa", fg = "red", bg = "black", command= self.dbC)
+        self.memebtn["width"] = 15
+        self.memebtn.pack()
+
+
+         #europa
+        
+        self.memebtn = tk.Button(self.f1_frame, text="America", fg = "red", bg = "black", command= self.dbC)
+        self.memebtn["width"] = 15
+        self.memebtn.pack()
+
+
+         #europa
+        
+        self.memebtn = tk.Button(self.f1_frame, text="Oceania", fg = "red", bg = "black", command= self.dbC)
+        self.memebtn["width"] = 15
+        self.memebtn.pack()
+        
+        
         # a simple button to click
         self._memebtn = tk.Button(self._frame, text="Request query", command= self.rqC)
         self._memebtn.pack(fill=tk.X, padx=(x1r,x1l), pady=10)
@@ -164,18 +209,14 @@ class MemeSimGUI():
 
     
     def db(self, f):
-        ''' Sets the callback function (the function to be executed) for the GUI button. '''
+       
         self.db = f
 
 
     def dbC(self):
         # if the user want us to do something when the button is clicked, do it 
         if not self.db is None:
-            self.db()
-
-
-            
-            
+            self.db()      
 
     def close(self):
         ''' Close the window. '''
