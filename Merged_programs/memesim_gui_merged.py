@@ -144,7 +144,7 @@ def setup():
     ZIGBEE.write(b'The program has started')
 
     RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
-    update_loc(RQS,10, LAB[0], LAB[1],0)
+    update_loc(RQS,10, C4[0], C4[1],0)
     update_loc(RQS, 11,C10[0], C6[1], 0)
     update_loc(RQS, 12,C10[0], C7[1], 0)
     send_commands(RQS)
@@ -185,7 +185,7 @@ def navigate_to(destination, robot_id):
     if (continent == 'CON3'):
         drive_to(M3[0],M3[1], robot_id)
     if (continent == 'LAB'):
-        drive_to(LAB[0],LAB[1], robot_id)
+        drive_to(MLAB[0],MLAB[1], robot_id)
     #read_pos(10)
 
 #update responses
@@ -220,6 +220,7 @@ def drive_to(x_goal, y_goal, robot_id):
 
 #move aligned robot towards goal
 def move_robot(x_goal, y_goal, robot_id):
+    print("Entered move_robot function")
     update_position(robot_id)
 
     #for updating virtual position of robot
@@ -227,8 +228,8 @@ def move_robot(x_goal, y_goal, robot_id):
     dif_y_step = (y_goal - y_pos[robot_id - 10]) / 7
 
     while ( ((abs(x_goal - x_pos[robot_id - 10]) ) > 100 ) or ((abs(y_goal - y_pos[robot_id - 10]) ) > 100 ) ):
-        if ( (x_goal - x_pos[robot_id - 10] ) < 0 ):
-            while ( (x_goal - x_pos[robot_id - 10]) < 0 ):
+        if ( (x_goal - x_pos[robot_id - 10] ) > 0 ):
+            while ( (x_goal - x_pos[robot_id - 10]) > 0 ):
                 update_position(robot_id)
                 ZIGBEE.write(b'f') #send: move forward
 
@@ -242,8 +243,8 @@ def move_robot(x_goal, y_goal, robot_id):
                 print("move forward")
                 sleep(0.1) #wait for stability
 
-        elif ((x_goal - x_pos[robot_id - 10]) > 0 ):
-            while ( (x_goal - x_pos[robot_id - 10] ) > 0 ):
+        elif ((x_goal - x_pos[robot_id - 10]) < 0 ):
+            while ( (x_goal - x_pos[robot_id - 10] ) < 0 ):
                 update_position(robot_id)
                 ZIGBEE.write(b'b') #send: move back
 
@@ -273,7 +274,9 @@ def align_robot(x_goal, y_goal, robot_id):
     print('Angle of difference vector is', angle_difference_vector)
     print('Angle of robot is', angle[robot_id - 10])
 
-    while (abs(angle_difference_vector - angle[robot_id - 10]) > 2): # 5 is foutmarge
+    read_pos(robot_id)
+
+    while (abs(angle_difference_vector - angle[robot_id - 10]) > 6): # 5 is foutmarge
         if (angle_difference_vector - angle[robot_id - 10] > 0):
             while (angle_difference_vector - angle[robot_id - 10] > 0):
                 print('Angle of difference vector is', angle_difference_vector)
@@ -285,7 +288,7 @@ def align_robot(x_goal, y_goal, robot_id):
                 RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
                 update_loc(RQS, robot_id,x_pos[robot_id - 10],y_pos[robot_id - 10],virtual_angle)
                 send_commands(RQS)
-                virtual_angle = virtual_angle + 10
+                virtual_angle = virtual_angle + 5
 
                 print("turn to right")
                 sleep(0.1) #wait for stability
@@ -301,7 +304,7 @@ def align_robot(x_goal, y_goal, robot_id):
                 RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
                 update_loc(RQS, robot_id,x_pos[robot_id - 10],y_pos[robot_id - 10],virtual_angle)
                 send_commands(RQS)
-                virtual_angle = virtual_angle - 10
+                virtual_angle = virtual_angle - 5
 
                 print("turn to left")
                 sleep(0.1)
