@@ -39,40 +39,63 @@ def rq():
     loop('rq')
 
 def mq():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("mq")
     loop('mq')
 
 def ip():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("ip.")
     loop('ip')
 
 def pi():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("pi.")
     loop('pi')
 
 def tm():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("tm")
     loop('tm')
 
 
 def pc():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("pc")
     loop('pc')
 
 def lc():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("lc")
     loop('lc')
 
 def db():
-    '''this function will be executed when the user clicks the button in the GUI'''
     print("db")
     loop('db')
+
+def eur():
+    print("db")
+    loop('eur')
+
+def afr():
+    print("db")
+    loop('afr')
+
+def ame():
+    print("db")
+    loop('ame')
+
+def lab():
+    print("db")
+    loop('lab')
+
+def lab():
+    print("db")
+    loop('db')
+
+def ein():
+    print("db")
+    loop('db')
+
+def lon():
+    print("db")
+    loop('db')
+
+
 
 
 
@@ -85,6 +108,7 @@ MEMESIM_GUI.tm(tm)
 MEMESIM_GUI.pc(pc)
 MEMESIM_GUI.lc(lc)
 MEMESIM_GUI.db(db)
+MEMESIM_GUI.eur(eur)
 def setup():
     ''' The setup function is called once at startup. You can put initialization code here. '''
 
@@ -142,13 +166,15 @@ def loop(mode):
     elif mode=='pi':
         ID=input("ID of the individual to interview")
         RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
-    elif mode=='tm':        
+    elif mode=='tm':
         RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,999,999)]
     elif mode=='pc':
         RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',999)]
     elif mode=='lc':
         RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
     elif mode=='db':
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='eur':
         RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
     RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,2500,150,20))
     RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
