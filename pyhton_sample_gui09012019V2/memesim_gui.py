@@ -1,3 +1,5 @@
+from math import pi
+
 # imports from standard modules
 from time import sleep
 from random import randint
@@ -18,7 +20,7 @@ MEMESIM_IP_ADDR = "131.155.124.132"
 
 # set the team number here
 TEAM_NUMBER = 4
-i =0
+i = 0
 
 # create a MemeSimClient object that takes car of all TCP communication with the simulator
 MEMESIM_CLIENT = MemeSimClient(MEMESIM_IP_ADDR, TEAM_NUMBER)
@@ -54,6 +56,21 @@ def setup():
         print("Could not connect to the simulator.")
         exit()
 
+    # create a list robot queries, one for each of the robots
+    RQS = [MemeSimCommand.RQ(TEAM_NUMBER, (TEAM_NUMBER-1)*3+r) for r in range(1, 2)]
+
+    # add a request to check the account balance
+    RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
+    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,150,150,2*pi))
+    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,11,150,150,2*pi))
+    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,12,150,150,2*pi))
+
+    # send the requests to the simulator
+    for req in RQS:
+        MEMESIM_CLIENT.send_command(req)
+
+    RESPONSES = MEMESIM_CLIENT.new_responses()
+
 def process_response(resp):
     '''The process_response function is called when a response is received from the simulator.'''
     print("Received response: " + str(resp))
@@ -73,27 +90,27 @@ def process_response(resp):
             # extract the data from the request
             balance = int(resp.cmdargs()[1])
             MEMESIM_GUI.show_balance(balance)
-      
+
 
 def loop():
     '''This function is called over and over again.'''
 
     global i
     # do something arbitray. To be adapted.
-    
+
     # create a list robot queries, one for each of the robots
     RQS = [MemeSimCommand.RQ(TEAM_NUMBER, (TEAM_NUMBER-1)*3+r) for r in range(1, 2)]
 
     # add a request to check the account balance
     RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
-    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,150+i,150,20))
-    i=i+1
+    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,150,150,(i/360)*2*pi))
+    i=i+5
     # send the requests to the simulator
-    
+
     for req in RQS:
         MEMESIM_CLIENT.send_command(req)
-    
-        
+
+
 
     # make a random mutation to some meme at a random position
     MY_MEMES['Meme1'][randint(0, 99)] = MemeGenome.Nucleotides[randint(0, 3)]
@@ -114,7 +131,7 @@ while not MEMESIM_GUI.is_closing:
     # process the new responses
     for r in RESPONSES:
         process_response(r)
-    
+
     # call the loop function
     loop()
 
