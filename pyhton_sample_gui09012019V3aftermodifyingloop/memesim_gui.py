@@ -121,7 +121,7 @@ def process_response(resp):
             # extract the data from the request
             balance = int(resp.cmdargs()[1])
             MEMESIM_GUI.show_balance(balance)
-      
+
 
 def loop(mode):
     '''This function is called over and over again.'''
@@ -131,7 +131,7 @@ def loop(mode):
     if mode=='rq':
         # create a list robot queries, one for each of the robots
         RQS = [MemeSimCommand.RQ(TEAM_NUMBER, (TEAM_NUMBER-1)*3+r) for r in range(1, 2)]
-    elif mode'':
+    elif mode == 'ca':
         # add a request to check the account balance
         RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
         RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,2500,150,20))
@@ -139,11 +139,11 @@ def loop(mode):
         #RQS.append(MemeSimCommand.MQ(4,10,20))
         i=i+1
         # send the requests to the simulator
-    
+
     for req in RQS:
         MEMESIM_CLIENT.send_command(req)
-    
-        
+
+
     # make a random mutation to some meme at a random position
     MY_MEMES['Meme1'][randint(0, 99)] = MemeGenome.Nucleotides[randint(0, 3)]
 
@@ -163,11 +163,11 @@ while not MEMESIM_GUI.is_closing:
     # process the new responses
     for r in RESPONSES:
         process_response(r)
-    
+
     # call the loop function
     #loop()
 
-    
+
     # slow the loop down, updating the GUI at a higher rate to improve responsiveness of the GUI
     for _ in range(0, 10):
         # update GUI
