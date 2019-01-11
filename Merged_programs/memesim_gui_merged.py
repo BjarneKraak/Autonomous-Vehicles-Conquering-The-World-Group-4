@@ -11,7 +11,6 @@ from lib.memesimresponse import MemeSimResponse
 from lib.memesimclient import MemeSimClient
 from lib.memesimresponse import MemeSimResponse
 from lib.gui.memesimgui import MemeSimGUI
-
 from lib.zigbee import Zigbee
 
 # Global variables/constants that can be accessed from all functions should be defined below

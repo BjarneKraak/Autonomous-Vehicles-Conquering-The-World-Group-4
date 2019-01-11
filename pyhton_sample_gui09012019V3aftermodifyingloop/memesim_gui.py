@@ -18,7 +18,7 @@ MEMESIM_IP_ADDR = "131.155.124.132"
 
 # set the team number here
 TEAM_NUMBER = 4
-Robot=10
+Robot=11
 i =0
 
 # create a MemeSimClient object that takes car of all TCP communication with the simulator
@@ -67,37 +67,9 @@ def db():
     print("db")
     loop('db')
 
-def eur():
-    print("db")
-    loop('eur')
-
-def afr():
-    print("db")
-    loop('afr')
-
-def ame():
-    print("db")
-    loop('ame')
-
-def lab():
-    print("db")
-    loop('lab')
-
-def lab():
-    print("db")
-    loop('db')
-
-def ein():
-    print("db")
-    loop('db')
-
-def lon():
-    print("db")
-    loop('db')
-
-
-
-
+def set():
+    print('set')
+    loop('set')
 
 # set the function to be called when the GUI buttin is clicked. the function is defined above
 MEMESIM_GUI.rq(rq)
@@ -108,7 +80,8 @@ MEMESIM_GUI.tm(tm)
 MEMESIM_GUI.pc(pc)
 MEMESIM_GUI.lc(lc)
 MEMESIM_GUI.db(db)
-MEMESIM_GUI.eur(eur)
+MEMESIM_GUI.set(set)
+
 def setup():
     ''' The setup function is called once at startup. You can put initialization code here. '''
 
@@ -167,16 +140,23 @@ def loop(mode):
         ID=input("ID of the individual to interview")
         RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
     elif mode=='tm':
-        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,999,999)]
+        genome=input("insert meme genome=")
+        ID=input("ID of the individual")
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,genome,ID)]
     elif mode=='pc':
-        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',999)]
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',genome)]
     elif mode=='lc':
         RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
     elif mode=='db':
         RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
     elif mode=='eur':
         RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
-    RQS.append(MemeSimCommand.RS(TEAM_NUMBER,10,2500,150,20))
+    elif mode=='set':
+        xpos=int(input("xpos="))
+        ypos=int(input("ypos="))
+        angle=20
+        RQS=[MemeSimCommand.RS(TEAM_NUMBER,Robot,xpos,ypos,20)]
+
     RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
         #RQS.append(MemeSimCommand.MQ(4,10,20))
         #i=i+1
