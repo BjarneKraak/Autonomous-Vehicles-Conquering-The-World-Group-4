@@ -15,8 +15,9 @@ x_pos = [None] * 3
 y_pos = [None] * 3
 angle = [None] * 3
 
-#suggestion: make different destination for every robot so a array with 3 variables
-destination = "C1"
+#make different destination for every robot so a array with 3 variables
+destination = [None] * 3
+destination[0] = "C1"
 
 #Location of all cities and lab
 #Contintent 1:
@@ -202,9 +203,6 @@ def read_pos(robot_id):
 setup()
 
 while True:
-    if (destination == 'C1' or destination == 'C2' or destination == 'C3' or destination == 'C4'):
-        navigate_to(destination, 10)
-    if (destination == 'C5' or destination == 'C6' or destination == 'C7' or destination == 'C8'):
-        navigate_to(destination, 11)
-    if (destination == 'C9' or destination == 'C10' or destination == 'C11' or destination == 'C12'):
-        navigate_to(destination, 12)
+        navigate_to(destination[0], 10)
+        navigate_to(destination[1], 11)
+        navigate_to(destination[2], 12)
