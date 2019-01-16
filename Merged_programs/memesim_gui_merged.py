@@ -116,6 +116,11 @@ def db():
     print("db")
     loop('db')
 
+
+def set():
+    print('set')
+    loop('set')
+
 def eur():
     drive_to(M1[0], M1[0], 10)
 
@@ -177,6 +182,7 @@ MEMESIM_GUI.tm(tm)
 MEMESIM_GUI.pc(pc)
 MEMESIM_GUI.lc(lc)
 MEMESIM_GUI.db(db)
+MEMESIM_GUI.set(set)
 
 #continents:
 MEMESIM_GUI.eur(eur)
@@ -434,8 +440,6 @@ def update_loc(RQS, robot_id,x,y,angle):
 
 def loop(mode):
     '''This function is called over and over again.'''
-
-    # do something arbitray. To be adapted.
     if mode=='rq':
         # create a list robot queries, one for each of the robots
         RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
@@ -450,13 +454,28 @@ def loop(mode):
         ID=input("ID of the individual to interview")
         RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
     elif mode=='tm':
-        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,999,999)]
+        #genome=input("insert meme genome=")
+        ID=input("ID of the individual")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,ID)]
     elif mode=='pc':
-        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',999)]
+        memeN=input("insert meme name=")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeN,meme_gen)]
     elif mode=='lc':
-        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
+        memeN=input("insert meme name=")
+        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeN,100)]
     elif mode=='db':
-        RQS=[ MemeSimCommand.DB(TEAM_NUMBER,'reset') ]
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='eur':
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='set':
+        xpos=int(input("xpos="))
+        ypos=int(input("ypos="))
+        angle=20
+        RQS=[MemeSimCommand.RS(TEAM_NUMBER,Robot,xpos,ypos,20)]
+
+    RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
 
     send_commands(RQS)
 

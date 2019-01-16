@@ -18,7 +18,7 @@ class MemeSimGUI():
 
         # set window title and size
         self._master.title("Welcome to the MemeSimGUI")
-        self._master.geometry('900x600')
+        self._master.geometry('900x700')
 
         # Creation of all frames
         self._frame = tk.Frame(self._master)
@@ -67,28 +67,26 @@ class MemeSimGUI():
         self.btn.pack(side=tk.TOP,  pady=x)
 
 
-        self.btn = tk.Button(self.commands, text="Interview person", command= self.mqC,width=13)
+        self.btn = tk.Button(self.commands, text="Interview person", command= self.ipC,width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
 
-        self.btn= tk.Button(self.commands, text="Process interview", command= self.ipC, width=13)
+        self.btn= tk.Button(self.commands, text="Process interview", command= self.piC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
 
-        self.btn = tk.Button(self.commands, text="Test meme", command= self.piC, width=13)
+        self.btn = tk.Button(self.commands, text="Test meme", command= self.tmC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
-        self.btn = tk.Button(self.commands, text="Prepare campaign",  command= self.tmC, width=13)
-        self.btn.pack(side=tk.TOP,  pady=x)
-
-
-        self.btn = tk.Button(self.commands, text="Launch campaign",  command= self.pcC, width=13)
+        self.btn = tk.Button(self.commands, text="Prepare campaign",  command= self.pcC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
 
-        self.btn = tk.Button(self.commands, text="Check account", command= self.lcC, width=13)
+        self.btn = tk.Button(self.commands, text="Launch campaign",  command= self.lcC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
+        self.btn = tk.Button(self.commands, text="Set position", command= self.setC, width=13)
+        self.btn.pack(side=tk.TOP,  pady=x)
 
         self.btn = tk.Button(self.commands, text="Debug",  command= self.dbC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
@@ -328,7 +326,6 @@ class MemeSimGUI():
     def ip(self, f):
         self.ip = f
 
-
     def ipC(self):
         if not self.ip is None:
             self.ip()
@@ -368,6 +365,14 @@ class MemeSimGUI():
     def lcC(self):
         if not self.lc is None:
             self.lc()
+
+    def set(self, f):
+        self.set = f
+
+
+    def setC(self):
+        if not self.set is None:
+            self.set()
 
 
     def db(self, f):
