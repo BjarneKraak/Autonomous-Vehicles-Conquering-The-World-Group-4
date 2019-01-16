@@ -11,7 +11,6 @@ from lib.memesimresponse import MemeSimResponse
 from lib.memesimclient import MemeSimClient
 from lib.memesimresponse import MemeSimResponse
 from lib.gui.memesimgui import MemeSimGUI
-
 from lib.zigbee import Zigbee
 
 # Global variables/constants that can be accessed from all functions should be defined below
@@ -47,7 +46,7 @@ LAB = [175, 1025]
 
 #middle of continents
 M1 = [1750, 875]
-M2 = [4375, 4375]
+M2 = [2750, 2750]
 M3 = [875, 1750]
 MLAB = [875, 875]
 
@@ -117,6 +116,63 @@ def db():
     print("db")
     loop('db')
 
+
+def set():
+    print('set')
+    loop('set')
+
+def eur():
+    drive_to(M1[0], M1[0], 10)
+
+def afr():
+    drive_to(M2[0], M2[0], 10)
+
+def ame():
+    drive_to(M3[0], M3[0], 10)
+
+def lab():
+    drive_to(MLAB[0], MLAB[0], 10)
+
+def ein():
+    drive_to(C1[0], C1[1], 10)
+
+def lon():
+    drive_to(C2[0], C2[1], 10)
+
+def mad():
+    drive_to(C3[0], C3[1], 10)
+
+def mil():
+    drive_to(C4[0], C4[1], 10)
+
+def joh():
+    drive_to(C5[0], C5[1], 10)
+
+def lag():
+    drive_to(C6[0], C6[1], 10)
+
+def kha():
+    drive_to(C7[0], C7[1], 10)
+
+def cai():
+    drive_to(C8[0], C8[1], 10)
+
+def was():
+    drive_to(C9[0], C9[1], 10)
+
+def bog():
+    drive_to(C10[0], C10[1], 10)
+
+def atl():
+    drive_to(C11[0], C11[1], 10)
+
+def lim():
+    drive_to(C12[0], C12[1], 10)
+
+def lab4():
+    drive_to(LAB[0], LAB[1], 10)
+
+
 # set the function to be called when the GUI buttin is clicked. the function is defined above
 MEMESIM_GUI.rq(rq)
 MEMESIM_GUI.mq(mq)
@@ -126,6 +182,34 @@ MEMESIM_GUI.tm(tm)
 MEMESIM_GUI.pc(pc)
 MEMESIM_GUI.lc(lc)
 MEMESIM_GUI.db(db)
+MEMESIM_GUI.set(set)
+
+#continents:
+MEMESIM_GUI.eur(eur)
+MEMESIM_GUI.afr(afr)
+MEMESIM_GUI.ame(ame)
+MEMESIM_GUI.lab(lab)
+
+#Contintent 1: Europe cities
+MEMESIM_GUI.ein(ein)
+MEMESIM_GUI.lon(lon)
+MEMESIM_GUI.mad(mad)
+MEMESIM_GUI.mil(mil)
+
+#Contintent 2: africa cities
+MEMESIM_GUI.joh(joh)
+MEMESIM_GUI.lag(lag)
+MEMESIM_GUI.kha(kha)
+MEMESIM_GUI.cai(cai)
+
+#Contintent 3: america cities
+MEMESIM_GUI.was(was)
+MEMESIM_GUI.bog(bog)
+MEMESIM_GUI.atl(atl)
+MEMESIM_GUI.lim(lim)
+
+#Contintent labland
+MEMESIM_GUI.lab4(lab4)
 
 # the setup function is called once at startup
 # you can put initialization code here
@@ -143,19 +227,28 @@ def setup():
 
     ZIGBEE.write(b'The program has started')
 
+    RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
+    update_loc(RQS,10, C4[0], C4[1],0)
+    send_commands(RQS)
+
 # the process_response function is called when a response is received from the simulator
 def process_response(resp):
+    print("Received response: " + str(resp))
     global x_pos
     global y_pos
     global angle
-    if resp.cmdtype() == 'rq':
-        if not resp.iserror():
+    if not resp.iserror():
+        if resp.cmdtype() == 'rq':
             robot_id = int(resp.cmdargs()[1])
             #save positions of robot
             x_pos[robot_id - 10] = float(resp.cmdargs()[2])
             y_pos[robot_id - 10] = float(resp.cmdargs()[3])
             angle[robot_id - 10] = ( float(resp.cmdargs()[4]) / (2*math.pi) )*360 #find angle and convert radians to degrees
-
+            MEMESIM_GUI.show_location(robot_id, x_pos[robot_id - 10], y_pos[robot_id - 10], angle[robot_id - 10])
+        elif resp.cmdtype() == 'ca':
+            # extract the data from the request
+            balance = int(resp.cmdargs()[1])
+            MEMESIM_GUI.show_balance(balance)
     #print("Received response: " + str(resp))
     ZIGBEE.write(b'The program has started')
 
@@ -168,6 +261,7 @@ def process_response(resp):
 #NEXT_FUNCTION:
 def navigate_to(destination, robot_id):
     print("navigate function")
+
     update_position(robot_id)
 
     continent = find_continent(robot_id)
@@ -178,7 +272,7 @@ def navigate_to(destination, robot_id):
     if (continent == 'CON3'):
         drive_to(M3[0],M3[1], robot_id)
     if (continent == 'LAB'):
-        drive_to(LAB[0],LAB[1], robot_id)
+        drive_to(MLAB[0],MLAB[1], robot_id)
     #read_pos(10)
 
 #update responses
@@ -213,60 +307,100 @@ def drive_to(x_goal, y_goal, robot_id):
 
 #move aligned robot towards goal
 def move_robot(x_goal, y_goal, robot_id):
-        #for updating virtual position of robot
-        RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
-        virtual_x = x_pos[robot_id - 10]
-        virtual_y = y_pos[robot_id - 10]
-        update_loc(RQS, 10,virtual_x, virtual_y, angle[robot_id - 10])
-        send_commands(RQS)
-        update_position(robot_id)
+    print("Entered move_robot function")
+    update_position(robot_id)
+
+    #for updating virtual position of robot
+    dif_x_step = (x_goal - x_pos[robot_id - 10]) / 7
+    dif_y_step = (y_goal - y_pos[robot_id - 10]) / 7
+
+    while (  ( (abs(x_goal) - abs(x_pos[robot_id - 10]) )  > 100 ) or ((abs(y_goal) - abs(y_pos[robot_id - 10]) ) > 100 ) ):
+        if ( (x_goal - x_pos[robot_id - 10] ) >= 0 ):
+            while ( (x_goal - x_pos[robot_id - 10]) >= 0 ):
+
+                ZIGBEE.write(b'f') #send: move forward
+
+                #for updating virtual position of robot
+                print("x_goal, y_goal =", x_goal, y_goal)
+                print("x_loc, y_loc=",x_pos[robot_id-10], y_pos[robot_id-10])
+                RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
+                update_loc(RQS, robot_id,x_pos[robot_id-10] + dif_x_step, y_pos[robot_id-10]+dif_y_step, angle[robot_id - 10])
+                send_commands(RQS)
+                update_position(robot_id)
+
+                print("move forward with ", dif_x_step)
+                sleep(0.1) #wait for stability
+
+        elif ((x_goal - x_pos[robot_id - 10]) < 0 ):
+            while ( (x_goal - x_pos[robot_id - 10] ) < 0 ):
+                ZIGBEE.write(b'b') #send: move back
+
+                #for updating virtual position of robot
+                print("x_goal, y_goal =", x_goal, y_goal)
+                print("x_loc, y_loc=",x_pos[robot_id-10], y_pos[robot_id-10])
+                RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
+                update_loc(RQS, robot_id,x_pos[robot_id-10] - dif_x_step, y_pos[robot_id-10]-dif_y_step, angle[robot_id - 10])
+                send_commands(RQS)
+                update_position(robot_id)
+
+                print("move backwards", dif_x_step)
+                sleep(0.1) #wait for stability
+
+        ZIGBEE.write(b's')
+        print("stop driving, robot on location")
 
 #align robot with goal
 def align_robot(x_goal, y_goal, robot_id):
     virtual_angle = 0
     #for updating virtual position of robot
     RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
-    update_loc(RQS, robot_id,150,150,virtual_angle)
+    update_loc(RQS, robot_id,x_pos[robot_id - 10],y_pos[robot_id - 10],virtual_angle)
     send_commands(RQS)
     update_position(robot_id)
 
     angle_difference_vector = alignment_angle(x_goal, y_goal, robot_id)
+    print('Angle of difference vector is', angle_difference_vector)
+    print('Angle of robot is', angle[robot_id - 10])
 
-    if (abs(angle_difference_vector - angle[robot_id - 10]) > 8): # 8 is foutmarge
-        if (angle_difference_vector - angle[robot_id - 10] < 0):
-            while (angle_difference_vector - angle[robot_id - 10] < 0):
+    read_pos(robot_id)
+
+    while ( (abs(angle_difference_vector) - abs (angle[robot_id - 10]) ) > 6): # 5 is foutmarge
+        if (angle_difference_vector - angle[robot_id - 10] >= 0):
+            while (angle_difference_vector - angle[robot_id - 10] >= 0):
                 print('Angle of difference vector is', angle_difference_vector)
                 print('Angle of robot is', angle[robot_id - 10])
                 ZIGBEE.write(b'r') #send: turn to right
-                update_position(robot_id) #update position
+
 
                 #for updating virtual position of robot
                 RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
-                update_loc(RQS, robot_id,150,150,virtual_angle)
+                update_loc(RQS, robot_id,x_pos[robot_id - 10],y_pos[robot_id - 10],angle_difference_vector)
                 send_commands(RQS)
                 virtual_angle = virtual_angle + 5
+                update_position(robot_id) #update position
 
                 print("turn to right")
                 sleep(0.1) #wait for stability
 
-        elif (angle_difference_vector - angle[robot_id - 10] > 0):
-            while (angle_difference_vector - angle[robot_id - 10] > 0):
+        elif (angle_difference_vector - angle[robot_id - 10] < 0):
+            while (angle_difference_vector - angle[robot_id - 10] < 0):
                 print('Angle of difference vector is', angle_difference_vector)
                 print('Angle of robot is', angle[robot_id - 10])
                 ZIGBEE.write(b'l') #send: turn to left
-                update_position(robot_id) #update position
+
 
                 #for updating virtual position of robot
                 RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
-                update_loc(RQS, robot_id,150,150,virtual_angle)
+                update_loc(RQS, robot_id,x_pos[robot_id - 10],y_pos[robot_id - 10],angle_difference_vector)
                 send_commands(RQS)
-                virtual_angle = virtual_angle + 5
+                virtual_angle = virtual_angle - 5
+                update_position(robot_id) #update position
 
                 print("turn to left")
                 sleep(0.1)
 
-        ZIGBEE.write(b's')
-        print("stop turning")
+    ZIGBEE.write(b's')
+    print("stop turning, robot aligned")
 
 #update position of robots: find x, y, and angle of robot
 def update_position(robot_id):
@@ -311,8 +445,6 @@ def update_loc(RQS, robot_id,x,y,angle):
 
 def loop(mode):
     '''This function is called over and over again.'''
-
-    # do something arbitray. To be adapted.
     if mode=='rq':
         # create a list robot queries, one for each of the robots
         RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
@@ -327,16 +459,30 @@ def loop(mode):
         ID=input("ID of the individual to interview")
         RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
     elif mode=='tm':
-        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,999,999)]
+        #genome=input("insert meme genome=")
+        ID=input("ID of the individual")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,ID)]
     elif mode=='pc':
-        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',999)]
+        memeN=input("insert meme name=")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeN,meme_gen)]
     elif mode=='lc':
-        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
+        memeN=input("insert meme name=")
+        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeN,100)]
     elif mode=='db':
-        RQS=[ MemeSimCommand.DB(TEAM_NUMBER,'reset') ]
-        navigate_to(destination[0], 10)
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='eur':
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='set':
+        xpos=int(input("xpos="))
+        ypos=int(input("ypos="))
+        angle=20
+        RQS=[MemeSimCommand.RS(TEAM_NUMBER,Robot,xpos,ypos,20)]
 
-    send_commands(RQS)
+    RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
+    for req in RQS:
+        MEMESIM_CLIENT.send_command(req)
 
     # make a random mutation to some meme at a random position
     MY_MEMES['Meme1'][randint(0, 99)] = MemeGenome.Nucleotides[randint(0, 3)]
@@ -365,8 +511,3 @@ while not MEMESIM_GUI.is_closing:
 
 # disconnect from the simulator
 MEMESIM_CLIENT.disconnect()
-
-#while True:
-        #navigate_to(destination[0], 10)
-        #navigate_to(destination[1], 11)
-        #navigate_to(destination[2], 12)
