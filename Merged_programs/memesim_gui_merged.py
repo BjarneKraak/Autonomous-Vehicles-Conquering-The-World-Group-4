@@ -233,17 +233,22 @@ def setup():
 
 # the process_response function is called when a response is received from the simulator
 def process_response(resp):
+    print("Received response: " + str(resp))
     global x_pos
     global y_pos
     global angle
-    if resp.cmdtype() == 'rq':
-        if not resp.iserror():
+    if not resp.iserror():
+        if resp.cmdtype() == 'rq':
             robot_id = int(resp.cmdargs()[1])
             #save positions of robot
             x_pos[robot_id - 10] = float(resp.cmdargs()[2])
             y_pos[robot_id - 10] = float(resp.cmdargs()[3])
             angle[robot_id - 10] = ( float(resp.cmdargs()[4]) / (2*math.pi) )*360 #find angle and convert radians to degrees
-
+            MEMESIM_GUI.show_location(robot_id, x_pos[robot_id - 10], y_pos[robot_id - 10], angle[robot_id - 10])
+        elif resp.cmdtype() == 'ca':
+            # extract the data from the request
+            balance = int(resp.cmdargs()[1])
+            MEMESIM_GUI.show_balance(balance)
     #print("Received response: " + str(resp))
     ZIGBEE.write(b'The program has started')
 
@@ -476,8 +481,8 @@ def loop(mode):
         RQS=[MemeSimCommand.RS(TEAM_NUMBER,Robot,xpos,ypos,20)]
 
     RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
-
-    send_commands(RQS)
+    for req in RQS:
+        MEMESIM_CLIENT.send_command(req)
 
     # make a random mutation to some meme at a random position
     MY_MEMES['Meme1'][randint(0, 99)] = MemeGenome.Nucleotides[randint(0, 3)]
