@@ -120,6 +120,10 @@ def process_response(resp):
             balance = int(resp.cmdargs()[1])
             MEMESIM_GUI.show_balance(balance)
 
+        #elif resp.cmdtype() == 'mq':
+                # extract the data from the request
+            ##    print(id)
+
 
 def loop(mode):
     '''This function is called over and over again.'''
@@ -140,13 +144,17 @@ def loop(mode):
         ID=input("ID of the individual to interview")
         RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
     elif mode=='tm':
-        genome=input("insert meme genome=")
+        #genome=input("insert meme genome=")
         ID=input("ID of the individual")
-        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,genome,ID)]
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,ID)]
     elif mode=='pc':
-        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',genome)]
+        memeN=input("insert meme name=")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeN,meme_gen)]
     elif mode=='lc':
-        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
+        memeN=input("insert meme name=")
+        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeN,100)]
     elif mode=='db':
         RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
     elif mode=='eur':

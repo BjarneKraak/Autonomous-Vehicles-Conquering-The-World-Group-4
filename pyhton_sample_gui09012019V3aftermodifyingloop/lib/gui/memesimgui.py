@@ -85,8 +85,6 @@ class MemeSimGUI():
         self.btn = tk.Button(self.commands, text="Launch campaign",  command= self.lcC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
-
-
         self.btn = tk.Button(self.commands, text="Set position", command= self.setC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
