@@ -14,7 +14,7 @@ class MemeSimResponse(object):
         match = MemeSimResponse.ResponseRegEx.search(responsestr)
         if match is None:
             raise Exception('There is no response in the data.')
-        
+
         lev1args = match.group(0).split('!')
 
         # get the command type and remove from the list
@@ -41,7 +41,8 @@ class MemeSimResponse(object):
 
     @staticmethod
     def extract_responses(inputdata):
-        ''' Convert the input from the string input data into a list of separate responses. Returns a pair consisting of the list of responses and the remaining input data that could not be further processed.
+        ''' Convert the input from the string input data into a list of separate responses. Returns a pair consisting of the list of responses and the remaining input data that
+        could not be further processed.
         It may contain partial responses that will be completed with more incoming data. '''
         result = list()
         pos = inputdata.find('\n')
