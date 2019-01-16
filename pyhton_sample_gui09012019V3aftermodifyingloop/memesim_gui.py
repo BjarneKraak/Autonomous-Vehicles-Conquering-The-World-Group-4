@@ -127,9 +127,6 @@ def process_response(resp):
 
 def loop(mode):
     '''This function is called over and over again.'''
-
-    #global i
-    # do something arbitray. To be adapted.
     if mode=='rq':
         # create a list robot queries, one for each of the robots
         RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
