@@ -49,7 +49,7 @@ void setup()
   last_time = millis(); // initalize last_time value with current time
   move.stopDriving(); // make sure the robot doesn't move
   xbee_init();
-  Serial.println("This is the lab_4 algorithm");
+  //Serial.println("This is the lab_4 algorithm");
   USServo.attach(ULTRASONIC_SERVO);  // Servo is connected to digital pin 11
 
   int angle;
@@ -68,39 +68,40 @@ void loop()
   {
     case 'l':
     {
-      turnHead(0, 'l');
-      head_pos = 90;
-      move.turnInf('l', 3);
+      //turnHead(0, 'l');
+      //head_pos = 90;
+      move.turnInf('l', 1);
       break;
     }
     case 'r':
     {
-      turnHead(0, 'l');
-      head_pos = 90;
-      move.turnInf('r', 3);
+      //turnHead(0, 'l');
+      //head_pos = 90;
+      move.turnInf('r', 1);
       break;
     }
     case 'f':
     {
-      move.driveInf('f',3);
-      sweepHead();
+      move.driveInf('f',1);
+      //sweepHead();
       break;
     }
     case 'b':
     {
-      turnHead(0, 'l');
-      head_pos = 90;
-      move.driveInf('b',3);
+      //turnHead(0, 'l');
+      //head_pos = 90;
+      move.driveInf('b',1);
       break;
     }
     case 's':
     {
-      turnHead(0, 'l');
+      //turnHead(0, 'l');
       move.stopDriving();
       break;
     }
   }
 
+/*
   char problem = checkForProblems();
   if (problem != 'N') //if there's a problem
   {
@@ -110,6 +111,7 @@ void loop()
     data = '0';
     flushSerial();
   }
+  */
 }
 
 int findLeftIRAvg() //calculate the average of 10 readings
