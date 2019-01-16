@@ -11,7 +11,6 @@ from lib.memesimresponse import MemeSimResponse
 from lib.memesimclient import MemeSimClient
 from lib.memesimresponse import MemeSimResponse
 from lib.gui.memesimgui import MemeSimGUI
-
 from lib.zigbee import Zigbee
 
 # Global variables/constants that can be accessed from all functions should be defined below
@@ -117,6 +116,11 @@ def db():
     print("db")
     loop('db')
 
+
+def set():
+    print('set')
+    loop('set')
+
 def eur():
     drive_to(M1[0], M1[0], 10)
 
@@ -178,6 +182,7 @@ MEMESIM_GUI.tm(tm)
 MEMESIM_GUI.pc(pc)
 MEMESIM_GUI.lc(lc)
 MEMESIM_GUI.db(db)
+MEMESIM_GUI.set(set)
 
 #continents:
 MEMESIM_GUI.eur(eur)
@@ -228,17 +233,22 @@ def setup():
 
 # the process_response function is called when a response is received from the simulator
 def process_response(resp):
+    print("Received response: " + str(resp))
     global x_pos
     global y_pos
     global angle
-    if resp.cmdtype() == 'rq':
-        if not resp.iserror():
+    if not resp.iserror():
+        if resp.cmdtype() == 'rq':
             robot_id = int(resp.cmdargs()[1])
             #save positions of robot
             x_pos[robot_id - 10] = float(resp.cmdargs()[2])
             y_pos[robot_id - 10] = float(resp.cmdargs()[3])
             angle[robot_id - 10] = ( float(resp.cmdargs()[4]) / (2*math.pi) )*360 #find angle and convert radians to degrees
-
+            MEMESIM_GUI.show_location(robot_id, x_pos[robot_id - 10], y_pos[robot_id - 10], angle[robot_id - 10])
+        elif resp.cmdtype() == 'ca':
+            # extract the data from the request
+            balance = int(resp.cmdargs()[1])
+            MEMESIM_GUI.show_balance(balance)
     #print("Received response: " + str(resp))
     ZIGBEE.write(b'The program has started')
 
@@ -435,8 +445,6 @@ def update_loc(RQS, robot_id,x,y,angle):
 
 def loop(mode):
     '''This function is called over and over again.'''
-
-    # do something arbitray. To be adapted.
     if mode=='rq':
         # create a list robot queries, one for each of the robots
         RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
@@ -451,15 +459,30 @@ def loop(mode):
         ID=input("ID of the individual to interview")
         RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
     elif mode=='tm':
-        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,999,999)]
+        #genome=input("insert meme genome=")
+        ID=input("ID of the individual")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,ID)]
     elif mode=='pc':
-        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,'xyz',999)]
+        memeN=input("insert meme name=")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeN,meme_gen)]
     elif mode=='lc':
-        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,'xyz',100)]
+        memeN=input("insert meme name=")
+        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeN,100)]
     elif mode=='db':
-        RQS=[ MemeSimCommand.DB(TEAM_NUMBER,'reset') ]
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='eur':
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='set':
+        xpos=int(input("xpos="))
+        ypos=int(input("ypos="))
+        angle=20
+        RQS=[MemeSimCommand.RS(TEAM_NUMBER,Robot,xpos,ypos,20)]
 
-    send_commands(RQS)
+    RQS.append(MemeSimCommand.CA(TEAM_NUMBER))
+    for req in RQS:
+        MEMESIM_CLIENT.send_command(req)
 
     # make a random mutation to some meme at a random position
     MY_MEMES['Meme1'][randint(0, 99)] = MemeGenome.Nucleotides[randint(0, 3)]
