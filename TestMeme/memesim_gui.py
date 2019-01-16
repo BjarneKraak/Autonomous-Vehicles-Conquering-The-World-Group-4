@@ -35,36 +35,36 @@ MEMESIM_GUI = MemeSimGUI(ROOT)
 
 '''
 def rq():
-
+    print("RQ.")
     loop('rq')
 
 def mq():
-
+    print("mq")
     loop('mq')
 
 def ip():
-
+    print("ip.")
     loop('ip')
 
 def pi():
-
+    print("pi.")
     loop('pi')
 
 def tm():
-
+    print("tm")
     loop('tm')
 
 
 def pc():
-
+    print("pc")
     loop('pc')
 
 def lc():
-
+    print("lc")
     loop('lc')
 
 def db():
-
+    print("db")
     loop('db')
 
 def eur():
@@ -84,22 +84,16 @@ def lab():
     loop('lab')
 
 def set():
+    print("set")
     loop("set")
 
 def ein():
-
+    print("db")
     loop('db')
 
 def lon():
-
+    print("db")
     loop('db')
-
-def res():
-    genomes.clear()
-    Database.clear()
-    People.clear()
-    print("Reset done!")
-    return
 
 
 
@@ -116,7 +110,6 @@ MEMESIM_GUI.lc(lc)
 MEMESIM_GUI.db(db)
 MEMESIM_GUI.eur(eur)
 MEMESIM_GUI.set(set)
-MEMESIM_GUI.res(res)
 def setup():
     ''' The setup function is called once at startup. You can put initialization code here. '''
 
@@ -133,8 +126,6 @@ def setup():
     if not MEMESIM_CLIENT.connect():
         print("Could not connect to the simulator.")
         exit()
-genomes=[] #list of processed genomes
-Database=[]# database of people inteviewed
 
 def process_response(resp):
     '''The process_response function is called when a response is received from the simulator.'''
@@ -162,10 +153,9 @@ def process_response(resp):
             z = 0
             p = 0
 
-            #print(nrofinterviews)
+            print(nrofinterviews)
             global People
-            size=50
-            People=[0]*size
+            People=[0]*20
 
             for i in range(0,(int(nrofinterviews)+int(p))):
                 try:
@@ -195,95 +185,99 @@ def process_response(resp):
                     z += 1
 
             for x in range (0, z):
-                print(x,'.',People[x])
-            z=size-z
-            People=People[:-z]
-            #print(People)
+                print(People[x])
 
-        elif resp.cmdtype() == 'pi':
-                genX = resp.cmdargs()[2]
-                #print(genX)
-                genomes.append(genX[1])
 
-length =100
-def ProduceGenome():
-    genPerfect = []
-    g = 0
-    #print('in function ',genomes)
-    while g < length:
-        gens = 0
-        occurences = [['A', 'C', 'T', 'G'],[0, 0, 0, 0]]
-        while gens < len(genomes):
-            o = 0
-            while o < len(occurences[0]):
-                if occurences[0][o] in genomes[gens][g]:
-                    occurences[1][o] += 1
-                o += 1
-            gens += 1
-        often = 0
-        howoften = 0
-        mostoften = 0
-        while often < len(occurences[0]):
-            if occurences[1][often] > howoften:
-                howoften = occurences[1][often]
-                mostoften = often
-            often += 1
-        #print(g, occurences, mostoften)
-        genPerfect.append(occurences[0][mostoften])
-        g += 1
 
-    for i in range(0,len(genomes)):
-        print(genomes[i])
 
-    FinalGen = ''.join(genPerfect)
-    print(FinalGen)
-    return FinalGen
+            coolmeme=DankestMemes(People) #start computing meme levels
+            cooldude=CoolestDude(People,coolmeme) #start computing id with highest level
+            print("end") #to know the script had made it to the end, can be removed later
+
+
+def DankestMemes(dudes): #look for the most popular memes, by computing the total level of a meme
+    memes = [[],[]] #start with an empty list of memes known to console
+    d = 0 #reset the iteration for id's
+    print(dudes)
+    while d < len(dudes): #iterate through all found id's
+        i = 0 #reset iteration of memes known by id
+        while i < len(dudes[d][0][0]): #iterate through memes known by id
+            m = 0 #reset iteration of memes known to console
+            state = 0 #the meme known by this id is not known by the console untill proven otherwise
+            while m < len(memes[0]): #iterate through memes known to console
+                if memes[0][m] == dudes[d][0][i]: #if the meme of the id is known by the console, do:
+                    memes[1][m] = memes[1][m]+dudes[d][1][i] #add level of id to known level
+                    state = 1 #the meme is known by the console
+                m+=1 #iterate to next meme known by console
+            if state == 0: #if the meme is not known, add it to the list of known memes
+                memes[0].append(dudes[d][0][i]) #add meme name to end of list
+                memes[1].append(dudes[d][1][i]) #add meme level to end of list
+            i+=1 #iterate to next meme known to id
+        d+=1 #iterate to next id
+    return memes#end function
+
+def CoolestDude(dudes,memes):
+    d = 0 #reset the iteration for id's
+    print(dudes)
+    coolness = [[],[]] #reset list of id level
+    while d < len(dudes): #iterate through all found id's
+        coolness[0].append(dudes[d]) #add id name to end of list
+        coolness[1].append(0) #add id level (which begins at 0) to end of list
+        i = 0 #reset iteration of memes known by id
+        while i < len(dudes[d][0]): #iterate through memes known by id
+            m = 0 #reset iteration of memes known to console
+            while m < len(memes[0]): #iterate through memes known by console
+                if memes[0][m] == dudes[d][0][i]: #if the meme names from the id and console compare, do:
+                    #add total meme level multiplied by the id specific meme level to the id's total level
+                    coolness[1][d] = coolness[1][d]+(memes[1][m]*dudes[d][1][i])
+                m+=1 #iterate to next meme known by console
+            i+=1 #iterate to next meme known by id
+        d+=1 #iterate to next id
+    highest = 0 #reset counter for the highest id level
+    c = 0 #reset iteration of id levels
+    while c < len(coolness[1]): #iterate through id levels
+        if coolness[1][c] > highest: #if a level is higher than the previous highest, do:
+            highest = coolness[1][c] #set highest level to the level of the current id
+            highestid = c #set id with highest level
+        c+=1 #iterate to next id level
+    print(dudes[highestid][2]) #return id with the highest level
+    return dudes[highestid][2]#end of function
 
 
 
 def loop(mode):
     '''This function is called over and over again.'''
-
     if mode=='rq':
         # create a list robot queries, one for each of the robots
         RQS = [MemeSimCommand.RQ(TEAM_NUMBER,Robot) ]
-
     elif mode=='mq':
         # add a request to check the account balance
-        #res() so as to auto reset every market research
         number=input("How many individuals?")
         global nrofinterviews
         nrofinterviews = number
         RQS=[MemeSimCommand.MQ(TEAM_NUMBER,Robot,number)]
     elif mode=='ip':
-        #print(People)
-        pseudoID=int(input("Person to interview"))
-        RQS= [MemeSimCommand.IP(TEAM_NUMBER,Robot,People[pseudoID][2])]
-        Database.append(People[pseudoID])
-        print(Database)
+        ID=input("ID of the individual to interview")
+        RQS= [MemeSimCommand.IP(TEAM_NUMBER,Robot,ID)]
     elif mode=='pi':
-        for i in range (0,len(Database)):
-            print(i,"numero:",Database[i][1])
-            RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,Database[i][2])]
-            for req in RQS:
-                MEMESIM_CLIENT.send_command(req)
-            sleep(1)
+        ID=input("ID of the individual to interview")
+        RQS= [MemeSimCommand.PI(TEAM_NUMBER,Robot,ID)]
     elif mode=='tm':
         #genome=input("insert meme genome=")
-        pseudoID=int(input("ID of the individual"))
-        meme_gen=ProduceGenome()
-        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,Database[pseudoID][2])]
+        ID=input("ID of the individual")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,ID)]
     elif mode=='pc':
-        memeName=input("insert meme name=")
-        meme_gen=ProduceGenome()
-        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeName,meme_gen)]
+        memeN=input("insert meme name=")
+        meme_gen='CCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCCTTTAAACCTTTAAACCCTTTAAACC'
+        RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeN,meme_gen)]
     elif mode=='lc':
-        memeName=input("insert meme name=")
-        budget=int(input("Whats the budeget"))
-        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeName,budget)]
+        memeN=input("insert meme name=")
+        RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeN,100)]
     elif mode=='db':
-        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'money')]
-
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
+    elif mode=='eur':
+        RQS=[MemeSimCommand.DB(TEAM_NUMBER,'reset')]
     elif mode=='set':
         xpos=int(input("xpos="))
         ypos=int(input("ypos="))
@@ -294,9 +288,9 @@ def loop(mode):
         #RQS.append(MemeSimCommand.MQ(4,10,20))
         #i=i+1
         # send the requests to the simulator
-    if mode!='pi':
-        for req in RQS:
-            MEMESIM_CLIENT.send_command(req)
+
+    for req in RQS:
+        MEMESIM_CLIENT.send_command(req)
 
 
     # make a random mutation to some meme at a random position

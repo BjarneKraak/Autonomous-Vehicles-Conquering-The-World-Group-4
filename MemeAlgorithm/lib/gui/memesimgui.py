@@ -94,6 +94,9 @@ class MemeSimGUI():
         self.btn = tk.Button(self.commands, text="Lab 4", command= self.lab4C, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
+        self.btn = tk.Button(self.commands, text="Reset", command= self.resC, width=13)
+        self.btn.pack(side=tk.TOP,  pady=x)
+
 
         self.btn = tk.Button(self.cont_f, text="Europe", command= self.eurC,  width=13)
         self.btn.pack(side=tk.TOP, pady=x)
@@ -382,6 +385,14 @@ class MemeSimGUI():
     def dbC(self):
         if not self.db is None:
             self.db()
+
+    def res(self, f):
+        self.res = f
+
+
+    def resC(self):
+        if not self.res is None:
+            self.res()
 
 
     def close(self):
