@@ -232,13 +232,22 @@ def ProduceGenome():
         genPerfect.append(occurences[0][mostoften])
         g += 1
 
+    text_file = open("Genomes.txt", "w")
+
     for i in range(0,len(genomes)):
-        print(genomes[i])
+        text=''.join(genomes[i])
+        text_file.write(str(i))
+        text_file.write(".  ")
+        text_file.write(text)
+        text_file.write("\n")
+
+    text_file.close()
 
     FinalGen = ''.join(genPerfect)
     print(FinalGen)
     printgen=[FinalGen]
     MEMESIM_GUI.show_meme(printgen[0])
+
     return FinalGen
 
 
@@ -258,7 +267,7 @@ def loop(mode):
         RQS=[MemeSimCommand.MQ(TEAM_NUMBER,Robot,number)]
     elif mode=='ip':
         #print(People)
-        pseudoID=int(input("Person to interview"))
+        pseudoID=int(input("Person to interview:"))
         RQS= [MemeSimCommand.IP(TEAM_NUMBER,Robot,People[pseudoID][2])]
         Database.append(People[pseudoID])
         print(Database)
@@ -271,23 +280,23 @@ def loop(mode):
             sleep(1)
     elif mode=='tm':
         #genome=input("insert meme genome=")
-        pseudoID=int(input("ID of the individual"))
+        pseudoID=int(input("ID of the individual:"))
         meme_gen=ProduceGenome()
         RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,Database[pseudoID][2])]
     elif mode=='pc':
-        memeName=input("insert meme name=")
+        memeName=input("Insert meme name:")
         meme_gen=ProduceGenome()
         RQS= [MemeSimCommand.PC(TEAM_NUMBER,Robot,memeName,meme_gen)]
     elif mode=='lc':
-        memeName=input("insert meme name=")
-        budget=int(input("Whats the budeget"))
+        memeName=input("Insert meme name:")
+        budget=int(input("Budeget:"))
         RQS=[MemeSimCommand.LC(TEAM_NUMBER,Robot,memeName,budget)]
     elif mode=='db':
         RQS=[MemeSimCommand.DB(TEAM_NUMBER,'money')]
 
     elif mode=='set':
-        xpos=int(input("xpos="))
-        ypos=int(input("ypos="))
+        xpos=int(input("Position x-axis:"))
+        ypos=int(input("Position y-axis:"))
         angle=20
         RQS=[MemeSimCommand.RS(TEAM_NUMBER,Robot,xpos,ypos,20)]
 
