@@ -10,7 +10,7 @@ Servo USServo;        // Create Servo object to control the servo
 
 //information for initializing zigbee module:
     // configure the next line with a unique ID number for every robot!
-    #define SELF     1
+    #define SELF        1
 
     // Define the pan (personal area network) number
     // It must be unique for every team and the same for all robots in one team!
@@ -40,6 +40,27 @@ char data; //wireless data
 int head_pos = 90;
 int add_amount = 10;
 
+char for_char;
+char back_char;
+char left_char;
+char right_char;
+char stop_char;
+
+int robot = 11;
+
+void xbee_init(void)
+{
+  Serial.begin(9600);                         // set the baud rate to 9600 to match the baud rate of the xbee module
+  Serial.flush();                             // make sure the buffer of the serial connection is empty
+  Serial.print("+++");                        // sending the characters '+++' will bring the XBee module in its command mode (see https://cdn.sparkfun.com/assets/resources/2/9/22AT_Commands.pdf)
+  delay(2000);                                // it will only go in command mode if there is a long enough pause after the '+++' characters. Wait two seconds.
+  Serial.print("ATCH " CHANNEL_ID "\r");      // set the channel to CHANNEL_ID
+  Serial.print("ATID " PAN_ID "\r");          // set the network PAN ID to PAN_ID
+  Serial.print("ATMY " TOSTRING(SELF) "\r");  // set the network ID of this module to SELF
+  Serial.print("ATDH 0000\rATDL FFFF\r");     // configure the modue to broadcast all messages to all other nodes in the PAN
+  Serial.print("ATCN\r");                     // exit command mode and return to transparent mode, communicate all data on the serial link onto the wireless network
+}
+
 void setup()
 {
   // initialize serial communication:
@@ -54,8 +75,30 @@ void setup()
 
   int angle;
   char turn_dir;
-  computeAngle(head_pos, &angle, &turn_dir);
-  turnHead(angle,turn_dir); // turn head to center (zero degrees to the left)
+  //computeAngle(head_pos, &angle, &turn_dir);
+
+  if (robot == 10){
+    for_char = 'f';
+    back_char = 'b';
+    left_char = 'l';
+    right_char = 'r';
+    stop_char = 's';
+  }
+  else if (robot == 11){
+    for_char = 'x';
+    back_char = 'y';
+    left_char = 'z';
+    right_char = 'a';
+    stop_char = 'c';
+  }
+  else if (robot == 12){
+    for_char = 'm';
+    back_char = 'n';
+    left_char = 'o';
+    right_char = 'p';
+    stop_char = 'q';
+  }
+
 }
 
 void loop()
@@ -64,40 +107,34 @@ void loop()
   {
     data = Serial.read();
   }
-  switch (data)
-  {
-    case 'l':
+
+    if (data == left_char)
     {
       //turnHead(0, 'l');
       //head_pos = 90;
-      move.turnInf('l', 1);
-      break;
+      move.turnInf('l', 3);
     }
-    case 'r':
+    else if (data == right_char)
     {
       //turnHead(0, 'l');
       //head_pos = 90;
-      move.turnInf('r', 1);
-      break;
+      move.turnInf('r', 3);
     }
-    case 'f':
+    else if (data == for_char)
     {
-      move.driveInf('f',1);
+      move.driveInf('f',3);
       //sweepHead();
-      break;
     }
-    case 'b':
+    else if (data == back_char)
     {
       //turnHead(0, 'l');
       //head_pos = 90;
-      move.driveInf('b',1);
-      break;
+      move.driveInf('b',3);
     }
-    case 's':
+    else if (data == stop_char)
     {
       //turnHead(0, 'l');
       move.stopDriving();
-      break;
     }
   }
 
@@ -112,7 +149,6 @@ void loop()
     flushSerial();
   }
   */
-}
 
 int findLeftIRAvg() //calculate the average of 10 readings
 {
@@ -151,18 +187,7 @@ long ultraMeasuredDistance() {
     return duration/29/2; //calculate distance based on time
   }
 
-void xbee_init(void)
-{
-  Serial.begin(9600);                         // set the baud rate to 9600 to match the baud rate of the xbee module
-  Serial.flush();                             // make sure the buffer of the serial connection is empty
-  Serial.print("+++");                        // sending the characters '+++' will bring the XBee module in its command mode (see https://cdn.sparkfun.com/assets/resources/2/9/22AT_Commands.pdf)
-  delay(2000);                                // it will only go in command mode if there is a long enough pause after the '+++' characters. Wait two seconds.
-  Serial.print("ATCH " CHANNEL_ID "\r");      // set the channel to CHANNEL_ID
-  Serial.print("ATID " PAN_ID "\r");          // set the network PAN ID to PAN_ID
-  Serial.print("ATMY " TOSTRING(SELF) "\r");  // set the network ID of this module to SELF
-  Serial.print("ATDH 0000\rATDL FFFF\r");     // configure the modue to broadcast all messages to all other nodes in the PAN
-  Serial.print("ATCN\r");                     // exit command mode and return to transparent mode, communicate all data on the serial link onto the wireless network
-}
+
 
 void turnHead(int angle, char dir){
   if (angle>35)
