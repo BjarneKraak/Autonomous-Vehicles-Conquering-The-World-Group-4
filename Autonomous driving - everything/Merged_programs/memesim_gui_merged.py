@@ -364,9 +364,12 @@ def ProduceGenome():
         text_file.write(text)
         text_file.write("\n")
 
-    text_file.close()
+
+
 
     FinalGen = ''.join(genPerfect)
+    test_file.write(FinalGen)
+    text_file.close()
     #print(FinalGen)
     printgen=[FinalGen]
     MEMESIM_GUI.show_meme(printgen[0])
@@ -575,6 +578,7 @@ def loop(mode):
         #genome=input("insert meme genome=")
         pseudoID=int(input("ID of the individual:"))
         meme_gen=ProduceGenome()
+        meme_gen=input("Provide genome:")
         RQS= [MemeSimCommand.TM(TEAM_NUMBER,Robot,meme_gen,Database[Robot-10][pseudoID][2])]
     elif mode=='pc':
         memeName=input("Insert meme name:")
