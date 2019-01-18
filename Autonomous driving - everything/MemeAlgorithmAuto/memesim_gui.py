@@ -9,14 +9,9 @@ from lib.memesimcommand import MemeSimCommand
 from lib.memesimresponse import MemeSimResponse
 from lib.memesimclient import MemeSimClient
 from lib.gui.memesimgui import MemeSimGUI
-from lib.zigbee import Zigbee
 
 
 # Global variables/constants that can be accessed from all functions should be defined below
-# Create a Zigbee object for communication with the Zigbee dongle
-# Make sure to set the correct COM port and baud rate!
-# You can find the com port and baud rate in the xctu program.
-ZIGBEE = Zigbee('COM12', 9600)
 
 # set the simulator IP address
 MEMESIM_IP_ADDR = "131.155.124.132"
@@ -79,55 +74,23 @@ def set():
     loop("set")
 
 def forw():
-    print("drive forward")
-    if Robot == 10:
-        ZIGBEE.write(b'f')
-    elif Robot == 11:
-        ZIGBEE.write(b'x')
-    elif Robot == 12:
-        ZIGBEE.write(b'm')
+    print("working")
     return
 
 def bac():
-    print("drive backward")
-    if Robot == 10:
-        ZIGBEE.write(b'b')
-    elif Robot == 11:
-        ZIGBEE.write(b'y')
-    elif Robot == 12:
-        ZIGBEE.write(b'n')
-     #send: move forward
-    return
-
-def lef():
-    print("turn left")
-    if Robot == 10:
-        ZIGBEE.write(b'l')
-    elif Robot == 11:
-        ZIGBEE.write(b'z')
-    elif Robot == 12:
-        ZIGBEE.write(b'o')
+    print("working")
     return
 
 def rig():
-    print("turn right")
-    if Robot == 10:
-        ZIGBEE.write(b'r')
-    elif Robot == 11:
-        ZIGBEE.write(b'a')
-    elif Robot == 12:
-        ZIGBEE.write(b'p')
-     #send: move forward
+    print("working")
+    return
+
+def lef():
+    print("working")
     return
 
 def sto():
-    print("stop")
-    if Robot == 10:
-        ZIGBEE.write(b's')
-    elif Robot == 11:
-        ZIGBEE.write(b'c')
-    elif Robot == 12:
-        ZIGBEE.write(b'q')
+    print("working")
     return
 
 def res():

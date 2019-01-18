@@ -37,6 +37,9 @@ class MemeSimGUI():
         self.btn.pack(side=tk.TOP, expand=tk.NO)
 
         #coomands frame
+        self.rbt = tk.Frame(self.btn, borderwidth=bwidth)
+        self.rbt.pack(side=tk.LEFT, expand=tk.YES, anchor=tk.N)
+
         self.commands = tk.Frame(self.btn, borderwidth=bwidth)
         self.commands.pack(side=tk.LEFT, expand=tk.YES, anchor=tk.N)
 
@@ -56,12 +59,34 @@ class MemeSimGUI():
         self.america_f = tk.Frame(self.btn, borderwidth=bwidth)
         self.america_f.pack(side=tk.LEFT, expand=tk.YES, anchor=tk.N)
 
-
         #Creation of all buttons
 
-        self.btn = tk.Button(self.commands, text="Robot query",command= self.rqC, width=13)
+        self.btn = tk.Button(self.rbt, text="Robot 1",command= self.rob1C, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
 
+        self.btn = tk.Button(self.rbt, text="Robot 2",command= self.rob2C, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+
+        self.btn = tk.Button(self.rbt, text="Robot 3",command= self.rob3C, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+        '''
+        self.btn = tk.Button(self.rbt, text="Stop",command= self.stoC, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+
+        self.btn = tk.Button(self.rbt, text="Forward",command= self.forwC, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+
+        self.btn = tk.Button(self.rbt, text="Right",command= self.rigC, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+
+        self.btn = tk.Button(self.rbt, text="Left",command= self.lefC, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+
+        self.btn = tk.Button(self.rbt, text="Backward",command= self.bacC, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
+        '''
+        self.btn = tk.Button(self.commands, text="Robot query",command= self.rqC, width=13)
+        self.btn.pack(side=tk.TOP, pady=x)
 
         self.btn= tk.Button(self.commands, text="Market query",  command= self.mqC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
@@ -84,14 +109,17 @@ class MemeSimGUI():
 
         self.btn = tk.Button(self.commands, text="Launch campaign",  command= self.lcC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
-
+        '''
         self.btn = tk.Button(self.commands, text="Set position", command= self.setC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
         self.btn = tk.Button(self.commands, text="Debug",  command= self.dbC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
-
+        '''
         self.btn = tk.Button(self.commands, text="Lab 4", command= self.lab4C, width=13)
+        self.btn.pack(side=tk.TOP,  pady=x)
+
+        self.btn = tk.Button(self.commands, text="Reset", command= self.resC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
 
@@ -158,12 +186,10 @@ class MemeSimGUI():
         self.btn.pack(side=tk.TOP, pady=x)
 
 
-
-
         # create the GUI elements
 
         # a text label with a meme genome
-        self._memelbl = tk.Label(self.meme_frame, text="A meme:")
+        self._memelbl = tk.Label(self.meme_frame, text="Optimal Meme:")
         # 'pack' determines the layout in the window. Google 'tkinter pack' for more info...
         self._memelbl.pack(fill=tk.X, padx=10, pady=10)
 
@@ -177,8 +203,11 @@ class MemeSimGUI():
         self._balance_lbl.pack(side=tk.TOP, fill=tk.X)
 
         # a button to close the GUI
+        #self.input = tk.Entry(self.meme_frame)
+        #self.input.pack(side=tk.BOTTOM)
+
         self._closebtn = tk.Button(self.meme_frame, text="Close", command=self.close)
-        self._closebtn.pack(side=tk.TOP, fill=tk.X)
+        self._closebtn.pack(side=tk.BOTTOM, fill=tk.X)
 
         # organize the frame layout
         self._frame.pack(fill=tk.X)
@@ -188,6 +217,61 @@ class MemeSimGUI():
         # closing state, will be set to True when the window is being closed
         self.is_closing = False
 
+    def  forw(self, f):
+        self.forw  = f
+
+    def  forwC(self):
+        if not self.forw  is None:
+            self.forw()
+
+    def  rig(self, f):
+        self.rig = f
+
+    def  rigC(self):
+        if not self.rig  is None:
+            self.rig()
+
+    def  lef(self, f):
+        self.lef  = f
+
+    def  lefC(self):
+        if not self.lef  is None:
+            self.lef ()
+
+    def  bac(self, f):
+        self.bac  = f
+
+    def  bacC(self):
+        if not self.bac  is None:
+            self.bac ()
+
+    def  sto(self, f):
+        self.sto  = f
+
+    def  stoC(self):
+        if not self.sto  is None:
+            self.sto ()
+
+    def rob1(self, f):
+        self.rob1 = f
+
+    def rob1C(self):
+        if not self.rob1 is None:
+            self.rob1()
+
+    def rob2(self, f):
+        self.rob2 = f
+
+    def rob2C(self):
+        if not self.rob2 is None:
+            self.rob2()
+
+    def rob3(self, f):
+        self.rob3 = f
+
+    def rob3C(self):
+        if not self.rob3 is None:
+            self.rob3()
 
     def eur(self, f):
         self.eur = f
@@ -383,6 +467,14 @@ class MemeSimGUI():
         if not self.db is None:
             self.db()
 
+    def res(self, f):
+        self.res = f
+
+
+    def resC(self):
+        if not self.res is None:
+            self.res()
+
 
     def close(self):
         ''' Close the window. '''
@@ -392,7 +484,7 @@ class MemeSimGUI():
         ''' Show a meme genome in the GUI '''
 
         # adapt the text of the text label
-        self._memelbl.configure(text=meme.genomestring())
+        self._memelbl.configure(text=meme)
 
     def show_location(self, id, x, y, phi):
         ''' show information about a robot position and orientation in the text box '''

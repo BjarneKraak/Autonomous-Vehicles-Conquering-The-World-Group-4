@@ -69,7 +69,7 @@ class MemeSimGUI():
 
         self.btn = tk.Button(self.rbt, text="Robot 3",command= self.rob3C, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
-
+        '''
         self.btn = tk.Button(self.rbt, text="Stop",command= self.stoC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
 
@@ -84,7 +84,7 @@ class MemeSimGUI():
 
         self.btn = tk.Button(self.rbt, text="Backward",command= self.bacC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
-
+        '''
         self.btn = tk.Button(self.commands, text="Robot query",command= self.rqC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
 
@@ -109,13 +109,13 @@ class MemeSimGUI():
 
         self.btn = tk.Button(self.commands, text="Launch campaign",  command= self.lcC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
-
+        '''
         self.btn = tk.Button(self.commands, text="Set position", command= self.setC, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
         self.btn = tk.Button(self.commands, text="Debug",  command= self.dbC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
-
+        '''
         self.btn = tk.Button(self.commands, text="Lab 4", command= self.lab4C, width=13)
         self.btn.pack(side=tk.TOP,  pady=x)
 
@@ -184,8 +184,6 @@ class MemeSimGUI():
 
         self.btn = tk.Button(self.america_f, text="Lima",  command= self.limC, width=13)
         self.btn.pack(side=tk.TOP, pady=x)
-
-
 
 
         # create the GUI elements

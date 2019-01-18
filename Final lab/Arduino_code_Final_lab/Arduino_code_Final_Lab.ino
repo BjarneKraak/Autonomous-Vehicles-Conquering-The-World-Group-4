@@ -8,6 +8,8 @@
 #include <Servo.h>
 Servo USServo;        // Create Servo object to control the servo
 
+int robot = 11;
+
 //information for initializing zigbee module:
     // configure the next line with a unique ID number for every robot!
     #define SELF        1
@@ -46,7 +48,7 @@ char left_char;
 char right_char;
 char stop_char;
 
-int robot = 11;
+
 
 void xbee_init(void)
 {
@@ -75,7 +77,7 @@ void setup()
 
   int angle;
   char turn_dir;
-  //computeAngle(head_pos, &angle, &turn_dir);
+  computeAngle(head_pos, &angle, &turn_dir);
 
   if (robot == 10){
     for_char = 'f';
@@ -110,35 +112,33 @@ void loop()
 
     if (data == left_char)
     {
-      //turnHead(0, 'l');
-      //head_pos = 90;
-      move.turnInf('l', 3);
+      turnHead(0, 'l');
+      head_pos = 90;
+      move.turnInf('l', 1);
     }
     else if (data == right_char)
     {
-      //turnHead(0, 'l');
-      //head_pos = 90;
-      move.turnInf('r', 3);
+      turnHead(0, 'l');
+      head_pos = 90;
+      move.turnInf('r', 1);
     }
     else if (data == for_char)
     {
       move.driveInf('f',3);
-      //sweepHead();
+      sweepHead();
     }
     else if (data == back_char)
     {
-      //turnHead(0, 'l');
-      //head_pos = 90;
+      turnHead(0, 'l');
+      head_pos = 90;
       move.driveInf('b',3);
     }
     else if (data == stop_char)
     {
-      //turnHead(0, 'l');
+      turnHead(0, 'l');
       move.stopDriving();
     }
-  }
-
-/*
+  
   char problem = checkForProblems();
   if (problem != 'N') //if there's a problem
   {
@@ -148,7 +148,7 @@ void loop()
     data = '0';
     flushSerial();
   }
-  */
+}
 
 int findLeftIRAvg() //calculate the average of 10 readings
 {
@@ -279,11 +279,12 @@ char checkForProblems()
   {
     problem = 'L';
   }
+  
   else if(right_avg>700) // if there's a line on the right side
   {
     problem = 'R';
   }
-  else if(distance < 15)
+  else if(distance < 10)
   {
     problem = 'O';
   }
@@ -308,15 +309,8 @@ void actToProblem(char problem)
       move.turn(40, 'r', 8);
       move.driveInf('f', 3);
       long cur_time = millis();
-      while(millis() - cur_time < 1500)
+      while(millis() - cur_time < 500)
       {
-          char problem = checkForProblems();
-          if (problem != 'N') //if there's a problem
-          {
-            if (debug) Serial.println("A problem occured");
-            move.stopDriving();
-            move.moveStraight(8, 'b');
-          }
       }
       move.stopDriving();
       break;
@@ -327,15 +321,8 @@ void actToProblem(char problem)
       move.turn(40, 'l', 8);
       move.driveInf('f', 3);
       long cur_time = millis();
-      while(millis() - cur_time < 1500)
+      while(millis() - cur_time < 500)
       {
-          char problem = checkForProblems();
-          if (problem != 'N') //if there's a problem
-          {
-            if (debug) Serial.println("A problem occured");
-            move.stopDriving();
-            move.moveStraight(8, 'b');
-          }
       }
       move.stopDriving();
       break;
@@ -358,15 +345,8 @@ void actToProblem(char problem)
       move.turn(angle,turn_dir);
       move.driveInf('f', 3);
       long cur_time = millis();
-      while(millis() - cur_time < 1500)
+      while(millis() - cur_time < 500)
       {
-          char problem = checkForProblems();
-          if (problem != 'N') //if there's a problem
-          {
-            if (debug) Serial.println("A problem occured");
-            move.stopDriving();
-            move.moveStraight(8, 'b');
-          }
       }
       move.stopDriving();
       break;
